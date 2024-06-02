@@ -36,7 +36,7 @@ git clone https://github.com/1122-Database-System-Final-Project/DBMSTR.git
 - Linux, MacOS
 
     ```
-    cd Login-System-with-Python-Flask-and-MySQL
+    cd DBMSTR
     python3 -m venv venv
     ```
 
@@ -57,7 +57,11 @@ git clone https://github.com/1122-Database-System-Final-Project/DBMSTR.git
     ```
 
 ### 4. 安裝需求的套件 Install the requirements
-
+如果系統提示需要更新 pip，使用以下指令更新：
+```
+python -m pip install --upgrade pip
+```
+接著安裝需求套件。
 ```
 pip install -r requirements.txt
 ```

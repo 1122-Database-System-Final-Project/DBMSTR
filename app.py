@@ -43,7 +43,7 @@ def select_seats(train_id):
         
         return redirect(url_for('booking_inquiry', train_id=train_id, seats=','.join(seats)))
     else:
-        seats = bk.get_seats_by_train_id(train_id)
+        seats = bk.get_all_seats_by_train_id(train_id)
         return render_template('seat_selection.html', seats=seats, train_id=train_id)
 
 @app.route('/booking_inquiry', methods=['GET', 'POST'])

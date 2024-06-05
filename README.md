@@ -43,3 +43,9 @@ sqlite3 database.db
 ```
 sqlite> .read create_database.sql
 ```
+
+### 5. 備份資料庫
+
+```
+sqlite> .backup backup.sq3
+```

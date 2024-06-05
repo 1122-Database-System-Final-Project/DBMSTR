@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  backend:
+    build: 
+      context: ./modules
+      dockerfile: Dockerfile
+    container_name: DBMS_backend_container
+    networks:
+      - dbms_network
+    depends_on:
+      - sqlite
+
+  sqlite:
+    build: 
+      context: ./database
+      dockerfile: Dockerfile
+    volumes:
+      - sqlite_volume:/var/lib/sqlite/data
+    healthcheck:
+      test: ["CMD", "sqlite3", "/var/lib/sqlite/data/database.db", ".tables"]
+      interval: 5s
+      timeout: 30s
+      retries: 5
+
+volumes:
+  sqlite_volume:
+
+networks:
+  dbms_network:
+    name: dbms_network

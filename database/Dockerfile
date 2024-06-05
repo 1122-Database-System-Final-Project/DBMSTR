@@ -6,6 +6,6 @@ WORKDIR /database
 
 COPY create_database.sql /database/
 
-RUN sqlite3 /database/database.db -init /database/create_database.sql
+RUN sqlite3 /database/database.db -init /database/backup.sq3
 
 CMD ["sqlite3", "/database/database.db"]

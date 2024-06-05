@@ -30,10 +30,12 @@ git clone https://github.com/1122-Database-System-Final-Project/DBMSTR.git
 ```
 sudo docker-compose up -d --build
 ```
+
 ### 3. 進入SQLite
 
 ```
-sqlite3
+cd database
+sqlite3 database.db
 ```
 
 ### 4. 載入tables

@@ -1,6 +1,7 @@
 import sqlite3
 import os
 from datetime import datetime
+import seat_management as seat
 
 '''
 路徑可能需要根據作業系統調整
@@ -35,19 +36,6 @@ def get_all_trains(start_time, end_time, start_station, end_station, counting, t
     # 回傳資料且回報成功
     return {"status": "success", "data": trains}
 
-# 獲取指定班次的所有座位
-def get_all_seats_by_train_id(train_id, counting):
-    connection = sqlite3.connect(DATABASE)
-    cursor = connection.cursor()
-    cursor.execute('''
-                   SELECT * 
-                   FROM seats 
-                   WHERE train_id = ? AND is_available = 1
-                   ''', (train_id, counting))
-    seats = cursor.fetchall()
-    connection.close()
-    return seats
-
 def book_seat(train_id, seats, passenger_info):
     connection = sqlite3.connect(DATABASE)
     cursor = connection.cursor()
@@ -63,14 +51,9 @@ def book_seat(train_id, seats, passenger_info):
             seat = cursor.fetchone() # 取得可用座位
             if seat is None or seat[0] == 0:
                 raise Exception("Seat is not available")
-
+        
         # 更新座位狀態
-        for seat_id in seats:
-            cursor.execute('''
-                        UPDATE seats 
-                        SET is_available = 0 
-                        WHERE id = ?
-                        ''', (seat_id,))
+        seat.update_seat_be_seated(seats)
 
         # 新增訂單
         booking_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")

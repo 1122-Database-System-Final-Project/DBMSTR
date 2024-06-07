@@ -17,7 +17,7 @@ TRTBS supports basic ticket booking services, including tickets booking, inquiri
 
 ## 安裝步驟 Installation
 
-### 1. 複製專案資料到本地端 Clone it into your local machine
+### 1. 複製專案資料到本地端
 
 前往放置專案的目錄，使用以下指令複製專案資料。<br>Navigate to the directory that you want to place the project. Then clone the repository. 
 
@@ -25,43 +25,27 @@ TRTBS supports basic ticket booking services, including tickets booking, inquiri
 git clone https://github.com/1122-Database-System-Final-Project/DBMSTR.git
 ```
 
-### 2. 建立虛擬環境 Create an virtual environment
+### 2. 啟動docker
 
-- Windows
-
-    ```
-    cd DBMSTR
-    python -m venv venv
-    ```
-- Linux, MacOS
-
-    ```
-    cd DBMSTR
-    python3 -m venv venv
-    ```
-
-### 3. 啟動虛擬環境 Activate the environment
-- Windows
-
-    ```
-    venv\Scripts\activate
-    ```
-
-- Linux, MacOS
-    ```
-    . venv/bin/activate
-    ```
-    or
-    ```
-    source venv/bin/activate
-    ```
-
-### 4. 安裝需求的套件 Install the requirements
-如果系統提示需要更新 pip，使用以下指令更新：
 ```
-python -m pip install --upgrade pip
+sudo docker-compose up -d --build
 ```
-接著安裝需求套件。
+
+### 3. 進入SQLite
+
 ```
-pip install -r requirements.txt
+cd database
+sqlite3 database.db
+```
+
+### 4. 載入tables
+
+```
+sqlite> .read create_database.sql
+```
+
+### 5. 備份資料庫
+
+```
+sqlite> .backup backup.sq3
 ```

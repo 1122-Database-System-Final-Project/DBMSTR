@@ -23,28 +23,34 @@ def get_all_available_seats_by_train_id(train_id):
 
 #更新訂的座位
 #seats會包含 car_id 和 seat_id
-def update_seat_be_seated(seats):
+def update_seat_be_seated(train_id, seats):
     connection = sqlite3.connect(DATABASE)
     cursor = connection.cursor()
     for car_id, seat_id in seats:
         cursor.execute('''
             UPDATE seat 
             SET occupied = 1 
-            WHERE car_id = ? AND seat_id = ?
-            ''', (car_id, seat_id,))
+            WHERE seat_id = ? AND car_id IN (
+                        SELECT car.car_id
+                        FROM seat JOIN car ON seat.car_id = car.car_id
+                        WHERE car.train_id = ? )
+            ''', (train_id, car_id, seat_id,))
     connection.commit()  
     connection.close()
         
 #刪除先前訂的座位
 #seats會包含 car_id 和 seat_id
-def delete_seated_seat(seats):
+def delete_seated_seat(train_id, seats):
     connection = sqlite3.connect(DATABASE)
     cursor = connection.cursor()
     for car_id, seat_id in seats:
         cursor.execute('''
             UPDATE seat 
             SET occupied = 0
-            WHERE car_id = ? AND seat_id = ?
-            ''', (car_id, seat_id,))
+            WHERE seat_id = ? AND car_id IN (
+                        SELECT car.car_id
+                        FROM seat JOIN car ON seat.car_id = car.car_id
+                        WHERE car.train_id = ? )
+            ''', (train_id, car_id, seat_id,))
     connection.commit() 
     connection.close()

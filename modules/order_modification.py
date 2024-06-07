@@ -22,6 +22,8 @@ def update_order_seats(order_id, new_seats):
     for seat_id in original_seats:
         cursor.execute('UPDATE seats SET is_available = 1 WHERE id = ?,', (seat_id,))
     
+
+    ##待完成: 連結ticket找該order全部的seat_id
     # 更新訂單中的座位
     cursor.execute('DELETE FROM booking WHERE order_id = ?', (order_id,))
     for seat_id in new_seats:

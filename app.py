@@ -1,7 +1,8 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 import modules.booking as bk
 import modules.seat_management as seat
 import modules.order_query as oq
+from modules.order_modification import update_order_seats
 
 app = Flask(__name__)
 
@@ -73,6 +74,27 @@ def query_order():
             return render_template('order_query.html', order_details=None, error_message=error_message)
     else:
         return render_template('order_query.html', order_details=None)
+    
+
+@app.route('/modify_order', methods=['POST'])
+def modify_order():
+    id_no = request.form.get('id_no')
+    order_id = request.form.get('order_id')
+    
+    # 查詢訂單
+    order = query_order(id_no, order_id)  # 使用從 order_query.py 引用的函數
+    if not order:
+        return jsonify({'status': 'error', 'message': 'Order not found'})
+    
+    # 獲取新座位
+    new_seats = request.form.getlist('new_seats')
+    if not new_seats:
+        return jsonify({'status': 'error', 'message': 'No seats selected'})
+    
+    # 更新訂單座位
+    update_order_seats(order_id, new_seats)
+    
+    return jsonify({'status': 'success', 'message': 'Order updated successfully'})
 
 if __name__ == '__main__':
     app.run(debug=True)

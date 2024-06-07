@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Order Query</title>
+</head>
+<body>
+    <h1>Query Order</h1>
+    <form method="POST" action="{{ url_for('query_order') }}">
+        <label for="id_no">ID Number:</label>
+        <input type="text" id="id_no" name="id_no" required><br>
+
+        <label for="order_id">Order ID:</label>
+        <input type="text" id="order_id" name="order_id" required><br>
+
+        <input type="submit" value="Query Order">
+    </form>
+
+    {% if error_message %}
+        <p style="color:red;">{{ error_message }}</p>
+    {% endif %}
+
+    {% if order_details %}
+        <h2>Order Details</h2>
+        <p>Order ID: {{ order_details.order_id }}</p>
+        <p>Train ID: {{ order_details.train_id }}</p>
+        <p>Departure: {{ order_details.departure }}</p>
+        <p>Destination: {{ order_details.destination }}</p>
+        <p>Departure Time: {{ order_details.depart_time }}</p>
+        <p>Arrival Time: {{ order_details.arrive_time }}</p>
+        <p>Order Status: {{ order_details.order_status }}</p>
+        <p>Name: {{ order_details.name }}</p>
+        <p>Phone: {{ order_details.phone }}</p>
+        <p>Email: {{ order_details.email }}</p>
+    {% endif %}
+</body>
+</html>

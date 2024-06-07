@@ -55,7 +55,6 @@ def book_seat(train_id, seats, ticket_type, depature, destination, depart_time, 
         
         # 更新座位狀態
         seat.update_seat_be_seated(train_id, seats)
-        
 
         # 新增訂單跟票
         # 算票價

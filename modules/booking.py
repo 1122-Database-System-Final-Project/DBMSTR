@@ -1,5 +1,6 @@
 import sqlite3
 import os
+import math
 from datetime import datetime
 import seat_management as seat
 
@@ -36,18 +37,18 @@ def get_all_trains(start_time, end_time, start_station, end_station, counting, t
     # 回傳資料且回報成功
     return {"status": "success", "data": trains}
 
-def book_seat(train_id, seats, passenger_info):
+def book_seat(train_id, seats, ticket_type, depature, destination, depart_time, arrive_time, passenger_info):
     connection = sqlite3.connect(DATABASE)
     cursor = connection.cursor()
 
     try:
         # 根據票的數量檢查座位是否可用
-        for seat_id in seats:
+        for car_id, seat_id in seats:
             cursor.execute('''
-                        SELECT is_available 
-                        FROM seats 
-                        WHERE id = ? AND train_id = ?
-                        ''', (seat_id, train_id))
+                        SELECT occupied 
+                        FROM seat 
+                        WHERE car_id = ? AND seat_id = ? AND train_id = ?
+                        ''', (car_id, seat_id, train_id))
             seat = cursor.fetchone() # 取得可用座位
             if seat is None or seat[0] == 0:
                 raise Exception("Seat is not available")
@@ -55,14 +56,24 @@ def book_seat(train_id, seats, passenger_info):
         # 更新座位狀態
         seat.update_seat_be_seated(seats)
 
-        # 新增訂單
+        # 新增訂單跟票
+        # 算票價
+        travel_time = (arrive_time - depart_time).total_seconds() / 60  # 以分鐘為單位
+        regular_price = math.ceil(travel_time * 2.5)
+        concession_price = math.ceil(regular_price * 0.5)
+        price = regular_price if ticket_type == 'regular' else concession_price
+
         booking_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        for seat_id in seats:
+        for car_id, seat_id in seats:
             cursor.execute('''
-                        INSERT INTO bookings (train_id, seat_id, passenger_info, booking_time) 
+                        INSERT INTO order (order_id, train_id, depature, destination, depart_time, arrive_time, user_id, order_status, pay_expire_data, booking_time)
                         VALUES (?, ?, ?, ?)
-                        ''', (train_id, seat_id, passenger_info, booking_time))
+                        ''', (order_id, train_id, depature, destination, depart_time, arrive_time, passenger_info, order_status, pay_expire_data, booking_time))
         
+            cursor.execute('''
+                            INSERT INTO ticket (ticket_id, ticket_type, price, car_id, sear_id, order_id)
+                            VALUES (?, ?, ?, ?, ?, ?)
+                           ''',(ticket_id, ticket_type_, price, car_id, seat_id, order_id))
         connection.commit()
         return {"status": "success", "message": "Booking successful"}
     

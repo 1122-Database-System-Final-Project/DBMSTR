@@ -12,45 +12,48 @@ DATABASE = os.path.join(BASE_DIRECTORY, '../database/train_booking.db') # 導航
 def get_all_available_seats_by_train_id(train_id):
     connection = sqlite3.connect(DATABASE)
     cursor = connection.cursor()
-    cursor.execute('''
-                   SELECT * 
-                   FROM seat JOIN car ON seat.car_id = car.car_id
-                   WHERE car.train_id = ? AND seat.occupied = 0
-                   ''', (train_id))
+    query = '''
+    SELECT s.car_id, s.seat_id
+    FROM seat s
+    JOIN car c ON s.car_id = c.car_id
+    JOIN train t ON c.train_id = t.train_id
+    WHERE t.train_id = ? -- 指定的班次
+        AND s.occupied = 0
+    '''
+    cursor.execute(query, (train_id))
+    # seats 會包含 car_id, seat_id
     seats = cursor.fetchall()
     connection.close()
     return seats
 
-#更新訂的座位
-#seats會包含 car_id 和 seat_id
-def update_seat_be_seated(train_id, seats):
+# 給定車次, 車廂號碼, 座位號碼, 更新訂的座位(一個一個處理)
+def update_seat_be_seated(train_id, car_id, seat_id):
     connection = sqlite3.connect(DATABASE)
     cursor = connection.cursor()
-    for car_id, seat_id in seats:
-        cursor.execute('''
-            UPDATE seat 
-            SET occupied = 1 
-            WHERE seat_id = ? AND car_id IN (
-                        SELECT car.car_id
-                        FROM seat JOIN car ON seat.car_id = car.car_id
-                        WHERE car.train_id = ? )
-            ''', (train_id, car_id, seat_id,))
+    cursor.execute('''
+        UPDATE seat s
+        JOIN car c ON s.car_id = c.car_id
+        JOIN train t ON c.train_id = t.train_id
+        SET s.occupied = 1 -- 更新成被佔用
+        WHERE t.train_id = ?
+            AND c.car_id = ?
+            AND s.seat_id = ?
+        ''', (train_id, car_id, seat_id))
     connection.commit()  
     connection.close()
         
-#刪除先前訂的座位
-#seats會包含 car_id 和 seat_id
-def delete_seated_seat(train_id, seats):
+# 給定車次, 車廂號碼, 座位號碼, 刪除先前訂的座位(一個一個處理)
+def delete_seated_seat(train_id, car_id, seat_id):
     connection = sqlite3.connect(DATABASE)
     cursor = connection.cursor()
-    for car_id, seat_id in seats:
-        cursor.execute('''
-            UPDATE seat 
-            SET occupied = 0
-            WHERE seat_id = ? AND car_id IN (
-                        SELECT car.car_id
-                        FROM seat JOIN car ON seat.car_id = car.car_id
-                        WHERE car.train_id = ? )
-            ''', (train_id, car_id, seat_id,))
+    cursor.execute('''
+        UPDATE seat s
+        JOIN car c ON s.car_id = c.car_id
+        JOIN train t ON c.train_id = t.train_id
+        SET s.occupied = 0 -- 取消被佔用
+        WHERE t.train_id = ?
+            AND c.car_id = ?
+            AND s.seat_id = ?
+        ''', (train_id, car_id, seat_id,))
     connection.commit() 
     connection.close()

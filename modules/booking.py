@@ -23,31 +23,31 @@ def get_all_trains(start_time, end_time, departure, destination, counting, train
 
     query = """
     SELECT
-        t.train_id,
+        train.train_id,
         sb1.departure_time AS train_departure_time, -- 出發時間
         sb2.arrival_time AS train_arrival_time, -- 抵達時間
-        s1.station_name AS departure_station, -- 出發車站
-        s2.station_name AS arrival_station, -- 抵達車站
+        st1.station_name AS departure_station, -- 出發車站
+        st2.station_name AS arrival_station, -- 抵達車站
         COUNT(seat.seat_id) AS available_seats -- 剩餘座位數
-    FROM train t
-    JOIN stopped_by sb1 ON t.train_id = sb1.train_id
-    JOIN stopped_by sb2 ON t.train_id = sb2.train_id
-    JOIN station s1 ON sb1.station_id = s1.station_id
-    JOIN station s2 ON sb2.station_id = s2.station_id
-    JOIN car ON t.train_id = car.train_id
+    FROM train
+    JOIN stopped_by sb1 ON train.train_id = sb1.train_id
+    JOIN stopped_by sb2 ON train.train_id = sb2.train_id
+    JOIN station st1 ON sb1.station_id = st1.station_id
+    JOIN station st2 ON sb2.station_id = st2.station_id
+    JOIN car ON train.train_id = car.train_id
     JOIN seat ON car.car_id = seat.car_id
-    WHERE t.train_type = ? -- 火車類型
-        AND s1.station_name = ? -- 出發車站
-        AND s2.station_name = ? -- 目標車站
+    WHERE train.train_type = ? -- 火車類型
+        AND st1.station_name = ? -- 出發車站
+        AND st2.station_name = ? -- 目標車站
         AND sb1.departure_time >= ? -- 開始時間
         AND sb1.departure_time <= ? -- 結束時間
         AND sb1.arrival_time < sb2.departure_time
         AND seat.occupied = 0 -- 車位沒有被佔用
-    GROUP BY t.train_id, sb1.departure_time, sb2.arrival_time, s1.station_name, s2.station_name
+    GROUP BY train.train_id, sb1.departure_time, sb2.arrival_time, st1.station_name, st2.station_name
     ORDER BY sb1.departure_time
     HAVING COUNT(seat.seat_id) > ? -- 大於購買票數
     """
-    params = [train_type, departure, destination, destination, start_time, end_time, counting]
+    params = [train_type, departure, destination, start_time, end_time, counting]
     
     cursor.execute(query, params)
     # trains 資訊包含train_departure_time, train_arrival_time, departure_station, arrival_station, available_seats
@@ -64,10 +64,14 @@ def calculate_ticket_price(travel_time):
     concession_discont = 0.5 # 優惠票折扣
 
     order_list = session.get('order_list', []) # 取得 session['order_list']
+    # if not order_list or 'ticket_type' not in order_list:
+    #     return {"status": "error", "message": "Invalid order list or missing ticket type"}
+
     # 根據身分別計算個別票價
-    if order_list['ticket_type'] == "regular":
+    ticket_type = order_list['ticket_type']
+    if ticket_type == "regular":
         ticket_price = math.ceil(travel_time * base_price_per_minute)
-    elif order_list['ticket_type'] == "concession":
+    elif ticket_type == "concession":
         ticket_price = math.ceil(travel_time * base_price_per_minute * concession_discont)
     
     return ticket_price
@@ -110,7 +114,7 @@ def check_order_consistency(counting):
 # 訂購座位(已經確認過訂購清單內的座位數量和購買車票數量一致之後)
 # seats 會包含 car_id, seat_id, seat_type
 # passenger_info 會包含 user_id, id_no, name, phone, email
-def book_seat(train_id, depature, destination, depart_time, arrive_time, passenger_info):
+def book_seat(train_id, depature, destination, depart_time, arrive_time, user_id):
     connection = sqlite3.connect(DATABASE)
     cursor = connection.cursor()
 
@@ -142,8 +146,8 @@ def book_seat(train_id, depature, destination, depart_time, arrive_time, passeng
         '''
         cursor.execute('''
                     INSERT INTO order (order_id, train_id, depature, destination, depart_time, arrive_time, user_id, order_status, pay_expire_data, booking_time)
-                    VALUES (?, ?, ?, ?)
-                    ''', (order_id, train_id, depature, destination, depart_time, arrive_time, passenger_info, order_status, pay_expire_data, booking_timestamp))
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ''', (order_id, train_id, depature, destination, depart_time, arrive_time, user_id, order_status, pay_expire_data, booking_timestamp))
             
         for item in order_list:
             # 產生車票編號, 暫定: 一個"T"加上九位數字的字串, f'T{next_ticket_num:09d}'

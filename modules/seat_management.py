@@ -31,14 +31,16 @@ def update_seat_be_seated(train_id, car_id, seat_id):
     connection = sqlite3.connect(DATABASE)
     cursor = connection.cursor()
     cursor.execute('''
-        UPDATE seat s
-        JOIN car c ON s.car_id = c.car_id
-        JOIN train t ON c.train_id = t.train_id
-        SET s.occupied = 1 -- 更新成被佔用
-        WHERE t.train_id = ?
-            AND c.car_id = ?
-            AND s.seat_id = ?
-        ''', (train_id, car_id, seat_id))
+        UPDATE seat
+        SET occupied = 1
+        WHERE seat_id = ?
+        AND car_id = ?
+        AND car_id IN (
+            SELECT car.car_id
+            FROM seat JOIN car ON seat.car_id = car.car_id
+            WHERE car.train_id = ?
+        )
+    ''', (seat_id, car_id, train_id))
     connection.commit()  
     connection.close()
         
@@ -47,13 +49,15 @@ def delete_seated_seat(train_id, car_id, seat_id):
     connection = sqlite3.connect(DATABASE)
     cursor = connection.cursor()
     cursor.execute('''
-        UPDATE seat s
-        JOIN car c ON s.car_id = c.car_id
-        JOIN train t ON c.train_id = t.train_id
-        SET s.occupied = 0 -- 取消被佔用
-        WHERE t.train_id = ?
-            AND c.car_id = ?
-            AND s.seat_id = ?
-        ''', (train_id, car_id, seat_id,))
+        UPDATE seat
+        SET occupied = 0
+        WHERE seat_id = ?
+        AND car_id = ?
+        AND car_id IN (
+            SELECT car.car_id
+            FROM car JOIN car ON seat.car_id = car.car_id
+            WHERE car.train_id = ?
+        )
+    ''', (seat_id, car_id, train_id))
     connection.commit() 
     connection.close()

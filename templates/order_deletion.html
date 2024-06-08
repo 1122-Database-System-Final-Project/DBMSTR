@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Delete Order</title>
+</head>
+<body>
+    <h1>Delete Order</h1>
+    <form method="POST" action="{{ url_for('delete_order_route') }}">
+        <label for="id_no">ID Number:</label>
+        <input type="text" id="id_no" name="id_no" required><br>
+        <label for="order_id">Order ID:</label>
+        <input type="text" id="order_id" name="order_id" required><br>
+        <input type="submit" value="Delete Order">
+    </form>
+    {% if message %}
+        <p>{{ message }}</p>
+    {% endif %}
+</body>
+</html>

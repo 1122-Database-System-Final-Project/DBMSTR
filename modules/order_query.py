@@ -2,24 +2,19 @@ import sqlite3
 from flask import Flask, request, jsonify
 import os
 
-app = Flask(__name__)
 
-# 設定資料庫路徑
+'''
+路徑可能需要根據作業系統調整
+'''
 BASE_DIRECTORY = os.path.abspath(os.path.dirname(__file__))
-DATABASE = os.path.join(BASE_DIRECTORY, '../database/train_booking.db')
+DATABASE = os.path.join(BASE_DIRECTORY, '../database/database.db')
 
 def get_db():
     conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row
     return conn
 
-def query_order():
-    id_no = request.args.get('id_no')
-    order_id = request.args.get('order_id')
-
-    if not id_no or not order_id:
-        return jsonify({"error": "Missing id_no or order_id"}), 400
-
+def query_order(id_no,order_id):
     conn = get_db()
     cur = conn.cursor()
 
@@ -30,7 +25,6 @@ def query_order():
     JOIN `user` u ON o.user_id = u.user_id
     WHERE o.id_no = ? AND o.order_id = ?
     """
-
     cur.execute(query, (id_no, order_id))
     order = cur.fetchone()
     conn.close()

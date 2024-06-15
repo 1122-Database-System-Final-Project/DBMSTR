@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Choose Seats</title>
+    <script>
+        function selectSeat(seatId) {
+            var selectedSeats = document.querySelectorAll('input[name="seats"]:checked');
+            document.getElementById('selected_count').innerText = selectedSeats.length;
+            document.getElementById('remaining_count').innerText = {{ counting }} - selectedSeats.length;
+        }
+    </script>
+</head>
+<body>
+    <h2>Select Seats for Train ID: {{ train_id }}</h2>
+
+    {% if counting %}
+    <h3>Number of Seats to Select: {{ counting }}</h3>
+
+    <form id="seat_form" action="/select_seats/{{ train_id }}" method="POST">
+        <input type="hidden" id="counting" name="counting" value="{{ counting }}">
+
+        {% if error_message %}
+        <p style="color: red;">{{ error_message }}</p>
+        {% endif %}
+
+        <h3>Available Seats:</h3>
+        {% if seats %}
+        <ul>
+            {% for seat in seats %}
+            <li>
+                <label>
+                    <input type="checkbox" name="seats" value="{{ seat.seat_id }}" onclick="selectSeat('{{ seat.seat_id }}')"> 
+                    Seat ID: {{ seat.seat_id }} (Car ID: {{ seat.car_id }}), Seat Type: {{ seat.seat_type }}
+                </label>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p>No seats available.</p>
+        {% endif %}
+
+        <p>Selected Seats: <span id="selected_count">0</span></p>
+        <p>Remaining Seats: <span id="remaining_count">{{ counting }}</span></p>
+        
+        <button type="submit">Next</button>
+    </form>
+
+    {% else %}
+    <form action="/select_seats/{{ train_id }}" method="POST">
+        <label for="counting">Enter Number of Seats:</label>
+        <input type="number" id="counting" name="counting" required>
+        <button type="submit">Submit</button>
+    </form>
+    {% endif %}
+
+</body>
+</html>
+
+

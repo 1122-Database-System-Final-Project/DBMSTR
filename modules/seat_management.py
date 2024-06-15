@@ -13,7 +13,7 @@ def get_all_available_seats_by_train_id(train_id):
     connection = sqlite3.connect(DATABASE)
     cursor = connection.cursor()
     cursor.execute('''
-                   SELECT * 
+                   SELECT seat.seat_id, seat.seat_type, seat.car_id 
                    FROM seat JOIN car ON seat.car_id = car.car_id
                    WHERE car.train_id = ? AND seat.occupied = 0
                    ''', (train_id))

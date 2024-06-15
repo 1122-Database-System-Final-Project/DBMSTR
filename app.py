@@ -1,6 +1,9 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 import modules.booking as bk
 import modules.seat_management as seat
+import modules.order_query as oq
+import modules.order_modification as om
+import modules.order_deletion as od
 
 app = Flask(__name__)
 
@@ -52,6 +55,86 @@ def booking_inquiry():
     if request.method == 'POST':
         train_id = request.form['train_id']
         seats = request
+
+#查詢訂單
+@app.route('/query_order', methods=['GET', 'POST'])
+def look_at_my_order():
+    if request.method == 'POST':
+        id_no = request.form.get('id_no')
+        order_id = request.form.get('order_id')
+
+        if not (id_no and order_id):
+            error_message = "Both ID number and Order ID are required."
+            return render_template('order_query.html', order_details=None, error_message=error_message)
+
+        order_details = oq.query_order(id_no, order_id)
+
+        if order_details:
+            return render_template('order_query.html', order_details=order_details, error_message=None)
+        else:
+            error_message = "Order not found."
+            return render_template('order_query.html', order_details=None, error_message=error_message)
+    else:
+        return render_template('order_query.html', order_details=None)
+    
+
+#修改訂單 查詢->查看空座位->修改座位
+@app.route('/modify_order', methods=['GET','POST'])
+def modify_order():
+    if request.method == 'POST':
+        id_no = request.form.get('id_no')
+        order_id = request.form.get('order_id')
+        if not id_no or not order_id:
+            error_message = "Both ID number and Order ID are required."
+            return render_template('order_modification.html', message=error_message)
+    
+        # 查詢訂單
+        order_details = oq.query_order(id_no, order_id)  # 使用從 order_query.py 引用的函數
+        if not order_details:
+            error_message = "Order not found"
+            return render_template('order_modification.html', message=error_message)
+    
+        # 找新座位
+        empty_seats = seat.get_all_available_seats_by_train_id(order_details["train_id"])
+
+        new_seats = request.form.getlist('new_seats')
+        if not new_seats:
+            error_message = "No seats selected"
+            return render_template('order_modification.html', message=error_message)
+
+        # 更新座位
+        om.change_my_seat(order_id, order_details["train_id"], new_seats)
+
+        success_message = "Order updated successfully"
+        return render_template('order_modification.html', message=success_message)
+    else:
+        return render_template('order_modification.html', message=None)
+
+
+
+#刪除訂單
+@app.route('/delete_order', methods=['POST'])
+def delete_order_route():
+    if request.method == 'POST':
+        id_no = request.form.get('id_no')
+        order_id = request.form.get('order_id')
+        if not id_no or not order_id:
+            error_message = "Both ID number and Order ID are required."
+            return render_template('order_deletion.html', message=error_message)
+    
+        # 查詢訂單
+        order_details = oq.query_order(id_no, order_id)  # 使用從 order_query.py 引用的函數
+
+        if not order_details:
+            error_message = "Order not found"
+            return render_template('order_deletion.html', message=error_message)
+    
+        od.delete_order(order_id,order_details["train_id"])
+
+        success_message = "Order deleted successfully"
+        return render_template('order_deletion.html', message=success_message)
+    else:
+        return render_template('order_deletion.html', message=None)
 
 if __name__ == '__main__':
     app.run(debug=True)

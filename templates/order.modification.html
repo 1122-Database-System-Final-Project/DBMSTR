@@ -23,9 +23,10 @@
             <h2>Available Seats</h2>
             <label for="new_seat_id">Select New Seat:</label>
             <select name="new_seats" id="new_seat_id" required>
-                {% for seat in seats %}
-                    <option value="{{ seat[0] }}">Seat ID: {{ seat[0] }}, Car ID: {{ seat[3] }}</option>
-                {% endfor %}
+                {% for seat in empty_seats %}
+                        <input type="checkbox" id="seat{{ seat.id }}" name="new_seats" value="{{ seat.id }}">
+                        <label for="seat{{ seat.id }}">{{ seat.id }}</label>
+                    {% endfor %}
             </select><br>
         {% endif %}
         <button type="submit">Modify Order</button>

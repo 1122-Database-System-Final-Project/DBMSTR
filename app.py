@@ -39,16 +39,21 @@ def query_train_no():
 @app.route('/select_seats/<train_id>', methods=['GET', 'POST'])
 def select_seats(train_id):
     if request.method == 'POST':
-        counting = request.form.get('counting')
-        seats = request.form.getlist('seats')
-        if len(seats) != int(counting):
-            error_message = f"You must select exactly {counting} seats."
-            return render_template('seat_selection.html', train_id=train_id, error_message=error_message)
-        
-        return redirect(url_for('booking_inquiry', train_id=train_id, seats=','.join(seats)))
+        if 'counting' in request.form:
+            counting = int(request.form['counting'])
+            seats = seat.get_all_available_seats_by_train_id(train_id)
+            return render_template('seat_selection.html', train_id=train_id, counting=counting, seats=seats)
+        elif 'seats' in request.form:
+            counting = int(request.form['counting'])
+            selected_seats = request.form.getlist('seats')
+            if len(selected_seats) != counting:
+                error_message = f"You must select exactly {counting}seats."
+                seats = seat.get_all_available_seats_by_train_id(train_id)
+                return render_template('seat_selection.html', train_id=train_id, counting=counting, seats=seats, error_message=error_message)
+            else:
+                return redirect(url_for('booking_inquiry', train_id=train_id, seats=','.join(selected_seats)))
     else:
-        seats = seat.get_all_available_seats_by_train_id(train_id)
-        return render_template('seat_selection.html', seats=seats, train_id=train_id)
+        return render_template('seat_selection.html', train_id=train_id)
 
 @app.route('/booking_inquiry', methods=['GET', 'POST'])
 def booking_inquiry():

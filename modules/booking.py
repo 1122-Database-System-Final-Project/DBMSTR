@@ -3,13 +3,25 @@ from flask import session
 import os
 import math
 from datetime import datetime, timedelta
-import seat_management
+from . import seat_management as sm
 
 '''
 路徑可能需要根據作業系統調整
 '''
 BASE_DIRECTORY = os.path.abspath(os.path.dirname(__file__)) # 取得當前檔案所在目錄的絕對路徑
 DATABASE = os.path.join(BASE_DIRECTORY, '../database/train_booking.db') # 導航到目錄位置
+
+# 獲取所有車站名稱以供選擇
+def get_all_stations_names():
+    conn = sqlite3.connect('database/database.db')
+    cursor = conn.cursor()
+    cursor.execute("""
+                   SELECT station_name 
+                   FROM station
+                   """)
+    stations = cursor.fetchall()
+    conn.close()
+    return {"status": "success", "data": stations}
 
 # 獲取所有班次以供選擇
 def get_all_trains(start_time, end_time, departure, destination, counting, train_type):
@@ -23,7 +35,7 @@ def get_all_trains(start_time, end_time, departure, destination, counting, train
 
     query = """
     SELECT
-        train.train_id,
+        train.train_id, -- 車次
         sb1.departure_time AS train_departure_time, -- 出發時間
         sb2.arrival_time AS train_arrival_time, -- 抵達時間
         st1.station_name AS departure_station, -- 出發車站
@@ -42,15 +54,15 @@ def get_all_trains(start_time, end_time, departure, destination, counting, train
         AND sb1.departure_time >= ? -- 開始時間
         AND sb1.departure_time <= ? -- 結束時間
         AND sb1.arrival_time < sb2.departure_time
-        AND seat.occupied = 0 -- 車位沒有被佔用
+        AND seat.occupied = 'n' -- 車位沒有被佔用
     GROUP BY train.train_id, sb1.departure_time, sb2.arrival_time, st1.station_name, st2.station_name
-    ORDER BY sb1.departure_time
     HAVING COUNT(seat.seat_id) > ? -- 大於購買票數
+    ORDER BY sb1.departure_time
     """
     params = [train_type, departure, destination, start_time, end_time, counting]
     
     cursor.execute(query, params)
-    # trains 資訊包含train_departure_time, train_arrival_time, departure_station, arrival_station, available_seats
+    # trains 資訊包含 train.train_id, train_departure_time, train_arrival_time, departure_station, arrival_station, available_seats
     trains = cursor.fetchall()
 
     connection.close()
@@ -123,7 +135,7 @@ def book_seat(train_id, depature, destination, depart_time, arrive_time, user_id
         
         for item in order_list:
             # 更新座位狀態
-            seat_management.update_seat_be_seated(train_id, item['car_id'], item['seat_id'])
+            sm.update_seat_be_seated(train_id, item['car_id'], item['seat_id'])
 
         ### 新增訂單跟票
         # 計算總票價

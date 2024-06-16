@@ -12,11 +12,17 @@ def delete_order(order_id,train_id):
     connection = sqlite3.connect(DATABASE)
     cursor = connection.cursor()
     
+    # 查詢該刪除的座位
     cursor.execute('SELECT seat_id FROM ticket WHERE order_id = ?', (order_id,))
     seats = cursor.fetchall()
 
+    # 查詢該刪除的車廂
+    cursor.execute('SELECT car_id FROM ticket WHERE order_id = ?', (order_id,))
+    car = cursor.fetchall()
+
+
     # 還原座位狀態
-    seat.delete_seated_seat(train_id, seats)
+    seat.delete_seated_seat(train_id,car, seats)
 
     # 刪除車票
     cursor.execute('''

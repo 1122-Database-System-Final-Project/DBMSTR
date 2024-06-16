@@ -21,7 +21,7 @@ def get_all_stations_names():
                    """)
     stations = cursor.fetchall()
     conn.close()
-    return {"status": "success", "data": stations}
+    return {"status": "success", "data": [station[0] for station in stations]}
 
 # 獲取所有班次以供選擇
 def get_all_trains(start_time, end_time, departure, destination, counting, train_type):
@@ -54,7 +54,7 @@ def get_all_trains(start_time, end_time, departure, destination, counting, train
         AND sb1.departure_time >= ? -- 開始時間
         AND sb1.departure_time <= ? -- 結束時間
         AND sb1.arrival_time < sb2.departure_time
-        AND seat.occupied = 0 -- 車位沒有被佔用
+        AND seat.occupied = 'n' -- 車位沒有被佔用
     GROUP BY train.train_id, sb1.departure_time, sb2.arrival_time, st1.station_name, st2.station_name
     HAVING COUNT(seat.seat_id) > ? -- 大於購買票數
     ORDER BY sb1.departure_time

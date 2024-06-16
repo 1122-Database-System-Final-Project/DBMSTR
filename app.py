@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, session, render_template, request, redirect, url_for, jsonify
 import modules.booking as bk
 import modules.seat_management as seat
 import modules.order_query as oq
@@ -6,34 +6,51 @@ import modules.order_modification as om
 import modules.order_deletion as od
 
 app = Flask(__name__)
+app.secret_key = "SECRET_6666"
 
+# 首頁
+@app.route('/')
+def index():
+    return render_template('index.html')
 
-@app.route('/query_train_no', methods=['GET', 'POST'])
-def query_train_no():
+# 開始訂票
+@app.route('/query_train', methods=['GET', 'POST'])
+def query_train():
     # 取得使用者提交的資訊
     if request.method == 'POST': 
+        # request.form 是 Flask 提供的物件, 用來存取 POST 請求提交的資訊,
+        # request.form 是一個字典, 它會從在 /get_all_trains_id 提交的表單數據中獲取 name 屬性為 select_items 的表單元素的值
         start_time = request.form.get('start_time')
         end_time = request.form.get('end_time')
-        start_station = request.form.get('start_station')
-        end_station = request.form.get('end_station')
-        counting = request.form.get('counting')
-        ticket_type = request.form.get('ticket_type')
-        
-        # 檢查所有字段是否已填寫
-        if not (start_time and end_time and start_station and end_station and counting and ticket_type):
-            error_message = "All fields are required."
-            return render_template('train_schedule.html', trains=[], error_message=error_message)
+        departure = request.form.get('departure')
+        destination = request.form.get('destination')
+        session["counting"] = request.form.get('counting') # 後面會用到, 用 session 儲存
+        train_type = request.form.get('train_type')
 
+       
         # 檢查是否成功取得資料
-        result = bk.get_all_trains(start_time, end_time, start_station, end_station, counting, ticket_type)
+        counting = session["counting"]
+        result = bk.get_all_trains(start_time, end_time, departure, destination, counting, train_type)
         if result["status"] == "error":
-            return render_template('train_schedule.html', trains=[], error_message=result["message"])
+            return render_template('query_train.html', trains=[], error_message=result["message"])
+        
+        # 成功取得資料後, 導航到查詢結果頁面
+        trains = result["data"]
+        # trains 資訊包含 train_departure_time, train_arrival_time, departure_station, arrival_station, available_seats
+        return render_template('query_train_results.html', trains=trains)
+    
+    # 提供網頁顯示需要的資料
+    else:
+        # 檢查是否成功取得資料
+        result = bk.get_all_stations_names()
+        if result["status"] == "error":
+            return render_template('query_train.html', stations=[], error_message=result["message"])
         
         # 成功取得資料後, 回傳火車時刻表
-        trains = result["data"]
-        return render_template('train_schedule.html', trains=trains)
-    else:
-        return render_template('train_schedule.html', trains=[])
+        stations_name_list = result["data"]
+        return render_template('query_train.html', stations=stations_name_list)
+
+
 
 # 選座位
 @app.route('/select_seats/<train_id>', methods=['GET', 'POST'])
@@ -55,11 +72,12 @@ def select_seats(train_id):
     else:
         return render_template('seat_selection.html', train_id=train_id)
 
-@app.route('/booking_inquiry', methods=['GET', 'POST'])
-def booking_inquiry():
-    if request.method == 'POST':
-        train_id = request.form['train_id']
-        seats = request
+@app.route('/confirm_order', methods=['GET', 'POST'])
+def confirm_order():
+
+        return render_template('confirm_order.html')
+
+
 
 #查詢訂單
 @app.route('/query_order', methods=['GET', 'POST'])

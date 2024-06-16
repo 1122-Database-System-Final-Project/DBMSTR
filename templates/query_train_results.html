@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Search Trains Results</title>
+    <!-- 連結 HTML 和 CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css')}}">
+    <!-- 連結 HTML 和 JS -->
+    <script type="text/javascript" src="{{ url_for('static', filename='js/main.js')}}"></script>
+</head>
+<body>
+    <h1>Search Results</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>火車班次</th>
+                <th>離站時間</th>
+                <th>到站時間</th>
+                <th>出發車站</th>
+                <th>抵達車站</th>
+                <th>剩餘空位數</th>
+                <th>訂票</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for train in trains %}
+            <tr>
+                <td>{{ train[0] }}</td>
+                <td>{{ train[1] }}</td>
+                <td>{{ train[2] }}</td>
+                <td>{{ train[3] }}</td>
+                <td>{{ train[4] }}</td>
+                <td>{{ train[5] }}</td>
+                <td>{{ train[6] }}</td>
+                <td><a href="{{ url_for('select_seat', train_id=train[0]) }}">Book</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

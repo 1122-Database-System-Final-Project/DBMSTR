@@ -21,7 +21,7 @@ def get_all_stations_names():
                    """)
     stations = cursor.fetchall()
     conn.close()
-    return {"status": "success", "data": stations}
+    return {"status": "success", "data": [station[0] for station in stations]}
 
 # 獲取所有班次以供選擇
 def get_all_trains(start_time, end_time, departure, destination, counting, train_type):

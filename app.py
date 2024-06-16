@@ -20,17 +20,23 @@ def query_train():
     if request.method == 'POST': 
         # request.form 是 Flask 提供的物件, 用來存取 POST 請求提交的資訊,
         # request.form 是一個字典, 它會從在 /get_all_trains_id 提交的表單數據中獲取 name 屬性為 select_items 的表單元素的值
+        session["booking_date"] = request.form.get('booking_date') # 建立訂單才會用到, 用 session 儲存
         start_time = request.form.get('start_time')
         end_time = request.form.get('end_time')
         departure = request.form.get('departure')
         destination = request.form.get('destination')
         session["counting"] = request.form.get('counting') # 後面會用到, 用 session 儲存
-        train_type = request.form.get('train_type')
-
+        train_type = request.form.get('train_type') # train_type 有 "Tze-Chiang", "Chu-Kuang"
+        
+        # 將train_type轉換為對應的查詢模式
+        if train_type == 'Tze-Chiang':
+            train_type_pattern = '110%'
+        elif train_type == 'Chu-Kuang':
+            train_type_pattern = '111%'
        
         # 檢查是否成功取得資料
         counting = session["counting"]
-        result = bk.get_all_trains(start_time, end_time, departure, destination, counting, train_type)
+        result = bk.get_all_trains(start_time, end_time, departure, destination, counting, train_type_pattern)
         if result["status"] == "error":
             return render_template('query_train.html', trains=[], error_message=result["message"])
         

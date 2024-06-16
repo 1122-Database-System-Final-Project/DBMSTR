@@ -75,7 +75,7 @@ def select_seats(train_id):
 @app.route('/confirm_order', methods=['GET', 'POST'])
 def confirm_order():
 
-        return render_template('confirm_order.html')
+return render_template('confirm_order.html')
 
 
 #查詢訂單

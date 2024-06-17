@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify
+from modules.search_train import train_query
 import modules.booking as bk
 import modules.seat_management as seat
 import modules.order_query as oq
@@ -7,6 +8,20 @@ import modules.order_deletion as od
 
 app = Flask(__name__)
 
+@app.route('/search_trains', methods=['GET'])
+def search_trains():
+    departure = request.args.get('departure')
+    destination = request.args.get('destination')
+    date = request.args.get('date')
+
+    if not departure or not destination or not date:
+        return jsonify({'error': 'Missing parameters'}), 400
+
+    trains = train_query(departure, destination, date)
+    if not trains:
+        return jsonify({'error': 'No trains found for the given parameters'}), 404
+    
+    return jsonify(trains)
 
 @app.route('/query_train_no', methods=['GET', 'POST'])
 def query_train_no():

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>訂票</title>
+</head>
+<body>
+    <h1>訂票</h1>
+    <form action="/search_trains" method="GET">
+        <label for="departure">出發站</label>
+        <input type="text" id="departure" name="departure" required><br>
+        
+        <label for="destination">目的地</label>
+        <input type="text" id="destination" name="destination" required><br>
+        
+        <label for="departure_date">出發日期</label>
+        <input type="date" id="departure_date" name="departure_date" required><br>
+        
+        <label for="departure_time1">出發時間</label>
+        <input type="time" id="departure_time1" name="departure_time1" required><br>
+        
+        <label for="departure_time2">至</label>
+        <input type="time" id="departure_time2" name="departure_time2" required><br>
+        
+        <label for="ticket_number">一般座票數</label>
+        <select id="ticket_number" name="ticket_number" required>
+            <option value="1" selected>1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+        </select><br>
+        
+        <label for="id_number">身分證字號</label>
+        <input type="text" id="id_number" name="id_number" required><br>
+        
+        <input type="submit" value="提交">
+    </form>
+</body>
+</html>

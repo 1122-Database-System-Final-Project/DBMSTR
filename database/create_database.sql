@@ -1,18 +1,39 @@
 CREATE TABLE IF NOT EXISTS [order](
-    order_id INTEGER PRIMARY KEY, train_id INTEGER, departure TEXT, destination TEXT, depart_time TEXT, arrive_time TEXT, user_id INTEGER, order_status TEXT, pay_expire_date TEXT, timestamp TEXT);
+    order_id INTEGER PRIMARY KEY, 
+    train_id INTEGER NOT NULL, departure TEXT NOT NULL, 
+    destination TEXT NOT NULL, depart_time TEXT NOT NULL, 
+    arrive_time TEXT NOT NULL, user_id INTEGER NOT NULL, 
+    order_status TEXT, pay_expire_date TEXT, timestamp TEXT,
+    FOREIGN KEY(train_id) REFERENCES train(train_id),
+    FOREIGN KEY(user_id) REFERENCES user(user_id));
 CREATE TABLE IF NOT EXISTS user(
-    user_id INTEGER PRIMARY KEY, id_no TEXT, name TEXT, phone TEXT, email TEXT);
+    user_id INTEGER PRIMARY KEY, 
+    id_no TEXT NOT NULL, name TEXT NOT NULL, 
+    phone TEXT, email TEXT);
 CREATE TABLE IF NOT EXISTS train(
     train_id INTEGER PRIMARY KEY, train_type TEXT);
 CREATE TABLE IF NOT EXISTS ticket(
-    ticket_id INTEGER PRIMARY KEY, ticket_type TEXT, price INTEGER, seat_id INTEGER, order_id INTEGER);
+    ticket_id INTEGER PRIMARY KEY, 
+    ticket_type TEXT NOT NULL, price INTEGER NOT NULL,
+    car_id INTEGER NOT NULL, seat_id INTEGER NOT NULL, 
+    order_id INTEGER NOT NULL,
+    FOREIGN KEY(seat_id) REFERENCES seat(seat_id),
+    FOREIGN KEY(order_id) REFERENCES [order](order_id));
 CREATE TABLE IF NOT EXISTS car(
-    car_id INTEGER PRIMARY KEY, seat_amount INTEGER, train_id INTEGER);
+    car_id INTEGER PRIMARY KEY, 
+    seat_amount INTEGER NOT NULL, train_id INTEGER NOT NULL,
+    FOREIGN KEY(train_id) REFERENCES train(train_id));
 CREATE TABLE IF NOT EXISTS seat(
-    seat_id INTEGER PRIMARY KEY, occupied TEXT, seat_type TEXT, car_id INTEGER);
+    seat_id INTEGER PRIMARY KEY, 
+    car_id INTEGER NOT NULL, occupied TEXT NOT NULL, seat_type TEXT, 
+    FOREIGN KEY(car_id) REFERENCES car(car_id));
 CREATE TABLE IF NOT EXISTS station(
-    station_id INTEGER PRIMARY KEY, station_name TEXT);
+    station_id INTEGER PRIMARY KEY, station_name TEXT  NOT NULL);
 CREATE TABLE IF NOT EXISTS stopped_by(
-    train_id INTEGER, station_id INTEGER, arrival_time TEXT, departure_time TEXT);
+    train_id INTEGER NOT NULL, station_id INTEGER NOT NULL, 
+    arrival_time TEXT NOT NULL, departure_time TEXT NOT NULL,
+    FOREIGN KEY(train_id) REFERENCES train(train_id),
+    FOREIGN KEY(station_id) REFERENCES station(station_id));
 CREATE TABLE IF NOT EXISTS service(
-    car_id INTEGER, service_type TEXT);
+    car_id INTEGER NOT NULL, service_type TEXT NOT NULL,
+    FOREIGN KEY(car_id) REFERENCES car(car_id));

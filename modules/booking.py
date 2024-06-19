@@ -9,18 +9,19 @@ from . import seat_management as sm
 路徑可能需要根據作業系統調整
 '''
 BASE_DIRECTORY = os.path.abspath(os.path.dirname(__file__)) # 取得當前檔案所在目錄的絕對路徑
-DATABASE = os.path.join(BASE_DIRECTORY, '../database/train_booking.db') # 導航到目錄位置
+DATABASE = os.path.join(BASE_DIRECTORY, '../database/database.db') # 導航到目錄位置
 
 # 獲取所有車站名稱以供選擇
 def get_all_stations_names():
-    conn = sqlite3.connect('database/database.db')
-    cursor = conn.cursor()
+    connection = sqlite3.connect(DATABASE)
+    cursor = connection.cursor()
     cursor.execute("""
-                   SELECT station_name 
+                   SELECT TRIM(station_name) 
                    FROM station
                    """)
     stations = cursor.fetchall()
-    conn.close()
+    print(f"stations: {stations}")
+    connection.close()
     return {"status": "success", "data": [station[0] for station in stations]}
 
 # 獲取所有班次以供選擇
@@ -48,22 +49,24 @@ def get_all_trains(start_time, end_time, departure, destination, counting, train
     JOIN station st2 ON sb2.station_id = st2.station_id
     JOIN car ON train.train_id = car.train_id
     JOIN seat ON car.car_id = seat.car_id
-    WHERE train.train_type = ? -- 火車類型
-        AND st1.station_name = ? -- 出發車站
-        AND st2.station_name = ? -- 目標車站
-        AND sb1.departure_time >= ? -- 開始時間
-        AND sb1.departure_time <= ? -- 結束時間
+    WHERE train.train_type LIKE ? -- 火車類型
+        AND st1.station_name LIKE ? -- 出發車站
+        AND st2.station_name LIKE ? -- 目標車站
+        -- AND sb1.departure_time >= ? -- 開始時間
+        -- AND sb1.departure_time <= ? -- 結束時間
         AND sb1.arrival_time < sb2.departure_time
-        AND seat.occupied = 'n' -- 車位沒有被佔用
+        AND seat.occupied LIKE '%n%' -- 車位沒有被佔用
     GROUP BY train.train_id, sb1.departure_time, sb2.arrival_time, st1.station_name, st2.station_name
-    HAVING COUNT(seat.seat_id) > ? -- 大於購買票數
+    HAVING COUNT(seat.seat_id) >= ? -- 大於購買票數
     ORDER BY sb1.departure_time
     """
-    params = [train_type, departure, destination, start_time, end_time, counting]
-    
+    params = [train_type, departure, destination, counting]
+    print(f"params: {params}")
+
     cursor.execute(query, params)
     # trains 資訊包含 train.train_id, train_departure_time, train_arrival_time, departure_station, arrival_station, available_seats
     trains = cursor.fetchall()
+    print(f"trains: {trains}")
 
     connection.close()
     

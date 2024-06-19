@@ -1,8 +1,8 @@
 import sqlite3
 from flask import Flask, request, jsonify
 import os
-import seat_management as seat
-import order_modification as om
+import modules.seat_management as seat
+import modules.order_modification as om
 
 # 設定資料庫路徑
 BASE_DIRECTORY = os.path.abspath(os.path.dirname(__file__))

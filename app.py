@@ -9,6 +9,10 @@ import modules.order_deletion as od
 app = Flask(__name__)
 app.secret_key = "SECRET_6666"
 
+# 首頁
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 # 開始訂票
 @app.route('/query_train', methods=['GET', 'POST'])
@@ -20,20 +24,15 @@ def query_train():
         session["booking_date"] = request.form.get('booking_date') # 建立訂單才會用到, 用 session 儲存
         start_time = request.form.get('start_time')
         end_time = request.form.get('end_time')
-        departure = request.form.get('departure')
-        destination = request.form.get('destination')
+        departure = '%' + request.form.get('departure') + '%'
+        destination = '%' + request.form.get('destination') + '%'
         session["counting"] = request.form.get('counting') # 後面會用到, 用 session 儲存
-        train_type = request.form.get('train_type') # train_type 有 "Tze-Chiang", "Chu-Kuang"
-        
-        # 將train_type轉換為對應的查詢模式
-        if train_type == 'Tze-Chiang':
-            train_type_pattern = '110%'
-        elif train_type == 'Chu-Kuang':
-            train_type_pattern = '111%'
-       
+        train_type = '%' + request.form.get('train_type') + '%' # train_type 有 "自強", "莒光"
+
+               
         # 檢查是否成功取得資料
-        counting = session["counting"]
-        result = bk.get_all_trains(start_time, end_time, departure, destination, counting, train_type_pattern)
+        counting = int(session["counting"])
+        result = bk.get_all_trains(start_time, end_time, departure, destination, counting, train_type)
         if result["status"] == "error":
             return render_template('query_train.html', trains=[], error_message=result["message"])
         
@@ -52,7 +51,6 @@ def query_train():
         # 成功取得資料後, 回傳火車時刻表
         stations_name_list = result["data"]
         return render_template('query_train.html', stations=stations_name_list)
-
 
 
 # 選座位

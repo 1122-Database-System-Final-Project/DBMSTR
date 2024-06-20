@@ -31,8 +31,7 @@
                 <td>{{ train[3] }}</td>
                 <td>{{ train[4] }}</td>
                 <td>{{ train[5] }}</td>
-                <td>{{ train[6] }}</td>
-                <td><a href="{{ url_for('select_seat', train_id=train[0]) }}">Book</a></td>
+                <td><a href="{{ url_for('select_seats', train_id=train[0]) }}">Book</a></td>
             </tr>
             {% endfor %}
         </tbody>

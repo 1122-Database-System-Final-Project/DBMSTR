@@ -29,8 +29,8 @@
             {% for seat in seats %}
             <li>
                 <label>
-                    <input type="checkbox" name="seats" value="{{ seat.seat_id }}" onclick="selectSeat('{{ seat.seat_id }}')"> 
-                    Seat ID: {{ seat.seat_id }} (Car ID: {{ seat.car_id }}), Seat Type: {{ seat.seat_type }}
+                    <input type="checkbox" name="seats" value="{{ seat_id }}" onclick="selectSeat('{{ seat_id }}')"> 
+                    Seat ID: {{ seat_id }} (Car ID: {{ car_id }}), Seat Type: {{ seat_type }}
                 </label>
             </li>
             {% endfor %}

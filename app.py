@@ -143,7 +143,7 @@ def modify_order():
 
 #刪除訂單
 @app.route('/delete_order', methods=['POST'])
-def delete_order_route():
+def delete_order():
     if request.method == 'POST':
         id_no = request.form.get('id_no')
         order_id = request.form.get('order_id')

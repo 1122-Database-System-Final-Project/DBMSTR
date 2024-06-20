@@ -8,7 +8,7 @@
     {% if message %}
         <p>{{ message }}</p>
     {% endif %}
-    <form method="POST">
+    <form method="POST" action="{{ url_for('modify_order') }}">
         <label for="id_no">ID Number:</label>
         <input type="text" name="id_no" id="id_no" required><br>
 

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>火車訂票系統</title>
+</head>
+<body>
+    <center><h1>歡迎來到火車訂票系統</h1>
+    
+    <ul>
+        <li><a href="{{ url_for('query_train') }}">開始訂票</a></li>
+        <li><a href="{{ url_for('look_at_my_order') }}">查詢我的訂單</a></li>
+        <li><a href="{{ url_for('modify_order') }}">修改我的訂單</a></li>
+        <li><a href="{{ url_for('delete_order_route') }}">取消我的訂單</a></li>
+        <li><a href="{{ url_for('search_trains') }}">查詢列車</a></li>
+    </ul>
+</body>
+</html>

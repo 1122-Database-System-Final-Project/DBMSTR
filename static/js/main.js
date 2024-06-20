@@ -1,32 +1,45 @@
 
 // 註冊一個事件監聽器, 在整個 HTML 文件完全加載和解析完畢後執行
 document.addEventListener('DOMContentLoaded', function() {
-    popTimeOptions();
+    generateDateOptions(document.getElementById('booking_date'));
+    generateTimeOptions(document.getElementById('start_time'));
+    generateTimeOptions(document.getElementById('end_time'));
     setupEventListeners(); // 設置特別的事件監聽器函數來監控指定變數的變化
     initializeSeatSelection(); // 初始化座位選擇功能
 });
 
-// 顯示時間列表
-function popTimeOptions() {
-    const startTimeSelect = document.getElementById('start_time');
-    const endTimeSelect = document.getElementById('end_time');
-    const start = new Date();
-    const end = new Date(start);
-    end.setDate(start.getDate() + 7);
-
-    let current = new Date(start);
-    while (current <= end) {
-        for (let h = 6; h < 24; h++) {
-            for (let m = 0; m < 60; m += 30) {
-                const time = current.toISOString().split('T')[0] + ` ${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-                startTimeSelect.add(new Option(time, time));
-                endTimeSelect.add(new Option(time, time));
-            }
-        }
-        current.setDate(current.getDate() + 1);
+// 生成訂票日期選項
+function generateDateOptions(selectElement) {
+    const today = new Date();
+    for (let i = 0; i < 7; i++) {
+        let date = new Date();
+        date.setDate(today.getDate() + i);
+        let dateStr = date.toISOString().split('T')[0];
+        let optionElement = document.createElement('option');
+        optionElement.value = dateStr;
+        optionElement.textContent = dateStr;
+        selectElement.appendChild(optionElement);
     }
 }
 
+// 生成時間選項
+function generateTimeOptions(selectElement) {
+    const startHour = 6; // 開始時間: 6 AM
+    const endHour = 24; // 結束時間: 12 AM
+    const stepMinutes = 30; // 每30分鐘一個選項
+
+    for (let hour = startHour; hour < endHour; hour++) {
+        for (let minute = 0; minute < 60; minute += stepMinutes) {
+            let hourStr = hour.toString().padStart(2, '0');
+            let minuteStr = minute.toString().padStart(2, '0');
+            let timeOption = `${hourStr}:${minuteStr}`;
+            let optionElement = document.createElement('option');
+            optionElement.value = timeOption;
+            optionElement.textContent = timeOption;
+            selectElement.appendChild(optionElement);
+        }
+    }
+}
 
 // 設置事件監聽器
 function setupEventListeners() {

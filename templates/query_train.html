@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <title>Search Trains</title>
@@ -10,14 +10,14 @@
 
 </head>
 <body>
-    <h1>Search for Trains</h1>
+    <h1>查詢車次</h1>
     <div id="query_train">
         <!-- 設置required, 當必填欄位未填寫時會阻止提交 -->
         <form action="{{ url_for('query_train') }}" method="POST">
 
-            <label for="booking_date">訂票日期:</label>
-            <select id="booking_date" name="booking_date" required></select>
-            <span id="booking_date_error" class="error"></span>
+            <label for="travel_date">訂票日期:</label>
+            <select id="travel_date" name="travel_date" required></select>
+            <span id="travel_date_error" class="error"></span>
             <br>
             
             <label for="start_time">開始時間:</label>

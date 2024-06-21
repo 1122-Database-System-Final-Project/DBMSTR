@@ -1,19 +1,20 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>Search Trains Results</title>
+    <title>Search Results</title>
     <!-- 連結 HTML 和 CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css')}}">
     <!-- 連結 HTML 和 JS -->
     <script type="text/javascript" src="{{ url_for('static', filename='js/main.js')}}"></script>
 </head>
 <body>
-    <h1>Search Results</h1>
+    <h1>查詢車次結果</h1>
     <table>
         <thead>
             <tr>
                 <th>火車班次</th>
+                <th>火車類型</th>
                 <th>離站時間</th>
                 <th>到站時間</th>
                 <th>出發車站</th>
@@ -31,7 +32,17 @@
                 <td>{{ train[3] }}</td>
                 <td>{{ train[4] }}</td>
                 <td>{{ train[5] }}</td>
-                <td><a href="{{ url_for('select_seats', train_id=train[0]) }}">Book</a></td>
+                <td>{{ train[6] }}</td>
+                <td><form action="{{ url_for('confirm_to_start') }}" method="POST">
+                    <input type="hidden" name="train_id" value="{{ train[0] }}">
+                    <input type="hidden" name="train_type" value="{{ train[1] }}">
+                    <input type="hidden" name="departure_time" value="{{ train[2] }}">
+                    <input type="hidden" name="arrival_time" value="{{ train[3] }}">
+                    <input type="hidden" name="departure_station" value="{{ train[4] }}">
+                    <input type="hidden" name="arrival_station" value="{{ train[5] }}">
+                    <input type="hidden" name="available_seats" value="{{ train[6] }}">
+                    <button type="submit">訂票</button>
+                </form></td>
             </tr>
             {% endfor %}
         </tbody>

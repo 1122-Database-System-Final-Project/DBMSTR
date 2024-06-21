@@ -98,8 +98,8 @@ def confirm_to_start():
 # 選座位
 @app.route('/select_seats', methods=['GET', 'POST'])
 def select_seats():
-    train_id = int(session['selected_train']["train_id"])
     if request.method == 'POST':
+        train_id = int(request.form.get('train_id'))
         if 'counting' in request.form:
             if 'seats' in request.form:
                 counting = int(request.form['counting'])
@@ -115,33 +115,34 @@ def select_seats():
             seats = seat.get_all_available_seats_by_train_id(train_id)
             return render_template('seat_selection.html', train_id=train_id, counting=counting, seats=seats)
     else:
+        train_id = int(session['selected_train']["train_id"])
         counting = int(session["counting"])
         return render_template('seat_selection.html', train_id=train_id, counting=counting)
 
 
 # 確認訂單
-@app.route('/confirm_order', methods=['GET', 'POST'])
+@app.route('/confirm_order', methods=['GET'])
 def confirm_order():
-    if request.method == 'POST':
-        
-        '''
-        order_list 需要再根據前面的部分調整
-        '''
-        order_list = request.form.getlist('order_list') # 獲取訂購清單
-        travel_time = session['selected_train']['travel_time']
+    '''
+    order_list 需要再根據前面的部分調整
+    '''
+    order_list = request.form.getlist('order_list') # 獲取訂購清單
+    travel_time = session['selected_train']['travel_time']
 
-        # 計算票價和總價
-        total_price = 0
-        for item in order_list:
-            price = bk.calculate_ticket_price(travel_time, item['ticket_type'])
-            total_price += price
-            item['ticket_price'] = price
+    # 計算票價和總價
+    total_price = 0
+    for item in order_list:
+        price = bk.calculate_ticket_price(travel_time, item['ticket_type'])
+        total_price += price
+        item['ticket_price'] = price
 
-        # 將訂購清單和票價存入session
-        session['order_list'] = order_list 
-        session['total_price'] = total_price
+    # 將訂購清單和票價存入session
+    session['order_list'] = order_list 
+    session['total_price'] = total_price
+    print(f"order_list:{order_list}")
+    print(f"total_price:{total_price}")
 
-        return render_template('confirm_order.html', order_list=order_list, total_price=total_price)
+    return render_template('confirm_order.html', order_list=order_list, total_price=total_price)
 
 # 送出訂單
 @app.route('/submit_order', methods=['POST'])

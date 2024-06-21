@@ -97,7 +97,8 @@ def confirm_to_start():
 
 # 選座位
 @app.route('/select_seats', methods=['GET', 'POST'])
-def select_seats(train_id):
+def select_seats():
+    train_id = int(session['selected_train']["train_id"])
     if request.method == 'POST':
         if 'counting' in request.form:
             if 'seats' in request.form:
@@ -115,7 +116,6 @@ def select_seats(train_id):
             return render_template('seat_selection.html', train_id=train_id, counting=counting, seats=seats)
     else:
         counting = int(session["counting"])
-        train_id = int(session["train_id"])
         return render_template('seat_selection.html', train_id=train_id, counting=counting)
 
 

@@ -109,7 +109,8 @@ def select_seats():
                     seats = seat.get_all_available_seats_by_train_id(train_id)
                     return render_template('seat_selection.html', train_id=train_id, counting=counting, seats=seats, error_message=error_message)
                 else:
-                    print(selected_seats)
+                    #print(selected_seats)
+                    seat.update_seat_be_seated(selected_seats)
                     return redirect(url_for('confirm_order', train_id=train_id, seats=','.join(selected_seats)))
             counting = int(request.form['counting'])
             seats = seat.get_all_available_seats_by_train_id(train_id)

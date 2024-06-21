@@ -160,6 +160,7 @@ def delete_order():
     else:
         return render_template('order_deletion.html', message=None)
 
+#查詢列車
 @app.route('/search_trains', methods=['GET'])
 def search_trains():
     departure = request.args.get('departure')
@@ -176,4 +177,4 @@ def search_trains():
     return jsonify(trains)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=8000)

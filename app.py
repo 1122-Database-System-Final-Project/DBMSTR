@@ -58,26 +58,26 @@ def query_train():
 def select_seats(train_id):
     if request.method == 'POST':
         if 'counting' in request.form:
+            if 'seats' in request.form:
+                counting = int(request.form['counting'])
+                selected_seats = request.form.getlist('seats')
+                if len(selected_seats) != counting:
+                    error_message = f"請再選一次！您應該要選{counting}個座位。"
+                    seats = seat.get_all_available_seats_by_train_id(train_id)
+                    return render_template('seat_selection.html', train_id=train_id, counting=counting, seats=seats, error_message=error_message)
+                else:
+                    print(selected_seats)
+                    return redirect(url_for('confirm_order', train_id=train_id, seats=','.join(selected_seats)))
             counting = int(request.form['counting'])
             seats = seat.get_all_available_seats_by_train_id(train_id)
             return render_template('seat_selection.html', train_id=train_id, counting=counting, seats=seats)
-        elif 'seats' in request.form:
-            counting = int(request.form['counting'])
-            selected_seats = request.form.getlist('seats')
-            if len(selected_seats) != counting:
-                error_message = f"You must select exactly {counting}seats."
-                seats = seat.get_all_available_seats_by_train_id(train_id)
-                return render_template('seat_selection.html', train_id=train_id, counting=counting, seats=seats, error_message=error_message)
-            else:
-                return redirect(url_for('booking_inquiry', train_id=train_id, seats=','.join(selected_seats)))
     else:
         return render_template('seat_selection.html', train_id=train_id)
 
+
 @app.route('/confirm_order', methods=['GET', 'POST'])
 def confirm_order():
-
-        return render_template('confirm_order.html')
-
+    return render_template('confirm_order.html')
 
 
 #查詢訂單

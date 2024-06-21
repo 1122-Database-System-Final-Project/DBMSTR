@@ -1,8 +1,8 @@
 import sqlite3
 from flask import Flask, request, jsonify
 import os
-import modules.seat_management as seat
-import modules.order_modification as om
+from . import seat_management as seat
+from . import order_modification as om
 
 # 設定資料庫路徑
 BASE_DIRECTORY = os.path.abspath(os.path.dirname(__file__))
@@ -22,7 +22,7 @@ def delete_order(order_id,train_id):
 
 
     # 還原座位狀態
-    seat.delete_seated_seat(train_id,car, seats)
+    seat.delete_seated_seat(train_id,seats)
 
     # 刪除車票
     cursor.execute('''

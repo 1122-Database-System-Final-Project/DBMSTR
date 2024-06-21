@@ -18,9 +18,10 @@
 
     <p>已選座位數: <span id="selected_count">0</span> ；尚需座位數: <span id="remaining_count">{{ counting }}</span></p>
     
-    <form id="seat_form" action="/select_seats/{{ train_id }}" method="POST">
+    <form id="seat_form" action="/select_seats" method="POST">
         <input type="hidden" id="counting" name="counting" value="{{ counting }}">
-
+        <input type="hidden" name="train_id" value="{{ train_id }}">
+        
         {% if error_message %}
         <p style="color: red;">{{ error_message }}</p>
         {% endif %}
@@ -45,7 +46,7 @@
     </form>
 
     {% else %}
-    <form action="/select_seats/{{ train_id }}" method="POST">
+    <form action="/select_seats" method="POST">
         <label for="counting">Enter Number of Seats:</label>
         <input type="number" id="counting" name="counting" required>
         <button type="submit">確定</button>

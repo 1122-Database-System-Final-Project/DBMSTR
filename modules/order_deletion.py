@@ -22,7 +22,7 @@ def delete_order(order_id,train_id):
 
 
     # 還原座位狀態
-    seat.delete_seated_seat(train_id,car, seats)
+    seat.delete_seated_seat(train_id,seats)
 
     # 刪除車票
     cursor.execute('''

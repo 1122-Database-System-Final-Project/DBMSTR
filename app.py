@@ -94,7 +94,7 @@ def look_at_my_order():
         order_details = oq.query_order(id_no, order_id)
 
         if order_details:
-            return render_template('order_query.html', order_details=order_details, error_message=None)
+            return render_template('order_query.html', order_details=order_details, error_message=None,id_no=id_no)
         else:
             error_message = "Order not found."
             return render_template('order_query.html', order_details=None, error_message=error_message)
@@ -110,13 +110,13 @@ def modify_order():
         order_id = request.form.get('order_id')
         if not id_no or not order_id:
             error_message = "Both ID number and Order ID are required."
-            return render_template('order_modification.html', message=error_message)
+            return render_template('order_query.html', message=error_message)
     
         # 查詢訂單
         order_details = oq.query_order(id_no, order_id)  # 使用從 order_query.py 引用的函數
         if not order_details:
             error_message = "Order not found"
-            return render_template('order_modification.html', message=error_message)
+            return render_template('order_query.html', message=error_message)
     
         # 找新座位
         empty_seats = seat.get_all_available_seats_by_train_id(order_details["train_id"])
@@ -144,19 +144,19 @@ def delete_order():
         order_id = request.form.get('order_id')
         if not id_no or not order_id:
             error_message = "Both ID number and Order ID are required."
-            return render_template('order_deletion.html', message=error_message)
+            return render_template('order_deletion.html', message=error_message,order_id=order_id,id_no=id_no)
     
         # 查詢訂單
         order_details = oq.query_order(id_no, order_id)  # 使用從 order_query.py 引用的函數
 
         if not order_details:
             error_message = "Order not found"
-            return render_template('order_deletion.html', message=error_message)
+            return render_template('order_deletion.html', message=error_message,order_id=order_id,id_no=id_no)
     
         od.delete_order(order_id,order_details["train_id"])
 
-        success_message = "Order deleted successfully"
-        return render_template('order_deletion.html', message=success_message)
+        success_message = "訂單成功取消"
+        return render_template('order_deletion.html', message=success_message,order_id=order_id,id_no=id_no)
     else:
         return render_template('order_deletion.html', message=None)
 

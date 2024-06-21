@@ -31,17 +31,18 @@ git clone https://github.com/1122-Database-System-Final-Project/DBMSTR.git
 sudo docker-compose up -d --build
 ```
 
-### 3. 進入SQLite
+### 3. 進入網站
+輸入
+```
+docker-compose logs
+```
+會出現網站網址（通常是http://127.0.0.1:8000），複製連結就可以進入網頁
+
+### 4. 進入SQLite
 
 ```
 cd database
 sqlite3 database.db
-```
-
-### 4. 載入tables
-
-```
-sqlite> .read create_database.sql
 ```
 
 ### 5. 備份資料庫

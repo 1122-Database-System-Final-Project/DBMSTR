@@ -1,7 +1,7 @@
 import sqlite3
 import os
-import modules.seat_management as seat
-import modules.order_query as oq
+from . import seat_management as seat
+from . import order_query as oq
 from flask import Flask, request, jsonify
 
 '''

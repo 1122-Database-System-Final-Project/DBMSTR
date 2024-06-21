@@ -14,7 +14,7 @@
         <li>車廂: {{ item['car_id'] }}, 座位: {{ item['seat_id'] }}, 票種: {{ item['ticket_type'] }}, 票價: {{ item['ticket_price'] }} 元</li>
         {% endfor %}
     </ul>
-    <p>總價: {{ tbooking_result['total_price'] }} 元</p>
+    <p>總價: {{ booking_result['total_price'] }} 元</p>
     <p>請在付款到期日 {{ booking_result['pay_expire_date'] }} 之前付款。</p>
 </body>
 </html>

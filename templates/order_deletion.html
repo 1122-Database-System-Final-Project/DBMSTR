@@ -1,19 +1,26 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Delete Order</title>
+    <title>Order Deletion</title>
 </head>
 <body>
-    <h1>Delete Order</h1>
-    <form method="POST" action="{{ url_for('delete_order_route') }}">
-        <label for="id_no">ID Number:</label>
-        <input type="text" id="id_no" name="id_no" required><br>
-        <label for="order_id">Order ID:</label>
-        <input type="text" id="order_id" name="order_id" required><br>
-        <input type="submit" value="Delete Order">
+    <h1>取消訂單</h1>
+    <p>確定要取消此訂單嗎?</p>
+    <p>訂單編號: {{ order_id }}</p>
+    <p>身分證字號: {{ id_no }}</p>
+    <form method="POST" action="{{ url_for('delete_order') }}">
+        <input type="hidden" name="id_no" value="{{ id_no }}">
+        <input type="hidden" name="order_id" value="{{ order_id }}">
+        <input type="submit" value="確認取消">
+    </form>
+    <form action="{{ url_for('look_at_my_order') }}">
+        <input type="submit" value="不小心按錯">
     </form>
     {% if message %}
         <p>{{ message }}</p>
+    {% else %}
+        <p>刪除訂單時發生錯誤。</p>
     {% endif %}
+    <br>
 </body>
 </html>

@@ -100,20 +100,24 @@ def confirm_to_start():
 def select_seats(train_id):
     if request.method == 'POST':
         if 'counting' in request.form:
+            if 'seats' in request.form:
+                counting = int(request.form['counting'])
+                selected_seats = request.form.getlist('seats')
+                if len(selected_seats) != counting:
+                    error_message = f"請再選一次！您應該要選{counting}個座位。"
+                    seats = seat.get_all_available_seats_by_train_id(train_id)
+                    return render_template('seat_selection.html', train_id=train_id, counting=counting, seats=seats, error_message=error_message)
+                else:
+                    print(selected_seats)
+                    return redirect(url_for('confirm_order', train_id=train_id, seats=','.join(selected_seats)))
             counting = int(request.form['counting'])
             seats = seat.get_all_available_seats_by_train_id(train_id)
             return render_template('seat_selection.html', train_id=train_id, counting=counting, seats=seats)
-        elif 'seats' in request.form:
-            counting = int(request.form['counting'])
-            selected_seats = request.form.getlist('seats')
-            if len(selected_seats) != counting:
-                error_message = f"You must select exactly {counting}seats."
-                seats = seat.get_all_available_seats_by_train_id(train_id)
-                return render_template('seat_selection.html', train_id=train_id, counting=counting, seats=seats, error_message=error_message)
-            else:
-                return redirect(url_for('booking_inquiry', train_id=train_id, seats=','.join(selected_seats)))
     else:
-        return render_template('seat_selection.html', train_id=train_id)
+        counting = int(session["counting"])
+        train_id = int(session["train_id"])
+        return render_template('seat_selection.html', train_id=train_id, counting=counting)
+
 
 # 確認訂單
 @app.route('/confirm_order', methods=['GET', 'POST'])
@@ -169,9 +173,6 @@ def submit_order():
         booking_result = result['data']
         return render_template('submit_order.html', booking_result=booking_result)
 
-if __name__ == '__main__':
-    app.run(debug=True)
-
 
 #查詢訂單
 @app.route('/query_order', methods=['GET', 'POST'])
@@ -187,7 +188,7 @@ def look_at_my_order():
         order_details = oq.query_order(id_no, order_id)
 
         if order_details:
-            return render_template('order_query.html', order_details=order_details, error_message=None)
+            return render_template('order_query.html', order_details=order_details, error_message=None,id_no=id_no)
         else:
             error_message = "Order not found."
             return render_template('order_query.html', order_details=None, error_message=error_message)
@@ -203,13 +204,13 @@ def modify_order():
         order_id = request.form.get('order_id')
         if not id_no or not order_id:
             error_message = "Both ID number and Order ID are required."
-            return render_template('order_modification.html', message=error_message)
+            return render_template('order_query.html', message=error_message)
     
         # 查詢訂單
         order_details = oq.query_order(id_no, order_id)  # 使用從 order_query.py 引用的函數
         if not order_details:
             error_message = "Order not found"
-            return render_template('order_modification.html', message=error_message)
+            return render_template('order_query.html', message=error_message)
     
         # 找新座位
         empty_seats = seat.get_all_available_seats_by_train_id(order_details["train_id"])
@@ -231,28 +232,29 @@ def modify_order():
 
 #刪除訂單
 @app.route('/delete_order', methods=['POST'])
-def delete_order_route():
+def delete_order():
     if request.method == 'POST':
         id_no = request.form.get('id_no')
         order_id = request.form.get('order_id')
         if not id_no or not order_id:
             error_message = "Both ID number and Order ID are required."
-            return render_template('order_deletion.html', message=error_message)
+            return render_template('order_deletion.html', message=error_message,order_id=order_id,id_no=id_no)
     
         # 查詢訂單
         order_details = oq.query_order(id_no, order_id)  # 使用從 order_query.py 引用的函數
 
         if not order_details:
             error_message = "Order not found"
-            return render_template('order_deletion.html', message=error_message)
+            return render_template('order_deletion.html', message=error_message,order_id=order_id,id_no=id_no)
     
         od.delete_order(order_id,order_details["train_id"])
 
-        success_message = "Order deleted successfully"
-        return render_template('order_deletion.html', message=success_message)
+        success_message = "訂單成功取消"
+        return render_template('order_deletion.html', message=success_message,order_id=order_id,id_no=id_no)
     else:
         return render_template('order_deletion.html', message=None)
 
+#查詢列車
 @app.route('/search_trains', methods=['GET'])
 def search_trains():
     departure = request.args.get('departure')
@@ -269,4 +271,4 @@ def search_trains():
     return jsonify(trains)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=8000)

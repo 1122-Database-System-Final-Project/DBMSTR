@@ -1,7 +1,7 @@
 import sqlite3
 import os
-import modules.seat_management as seat
-import modules.order_query as oq
+from . import seat_management as seat
+from . import order_query as oq
 from flask import Flask, request, jsonify
 
 '''
@@ -18,12 +18,16 @@ def change_my_seat(order_id,train_id,new_seats):
     # 查詢訂單原本的座位
     cursor.execute('SELECT seat_id FROM ticket WHERE order_id = ?', (order_id,))
     original_seats = cursor.fetchall()
+
+    # 查詢訂單原本的車廂
+    cursor.execute('SELECT car_id FROM ticket WHERE order_id = ?', (order_id,))
+    original_car = cursor.fetchall()
     
     # 更新新座位
-    seat.update_seat_be_seated(train_id, new_seats)
+    seat.update_seat_be_seated(train_id,original_car, new_seats)
 
     # 刪除原本座位
-    seat.delete_seated_seat(train_id, original_seats)
+    seat.delete_seated_seat(train_id,original_car, original_seats)
 
     connection.commit()
     connection.close()

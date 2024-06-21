@@ -1,7 +1,7 @@
 
 // 註冊一個事件監聽器, 在整個 HTML 文件完全加載和解析完畢後執行
 document.addEventListener('DOMContentLoaded', function() {
-    generateDateOptions(document.getElementById('booking_date'));
+    generateDateOptions(document.getElementById('travel_date'));
     generateTimeOptions(document.getElementById('start_time'));
     generateTimeOptions(document.getElementById('end_time'));
     setupEventListeners(); // 設置特別的事件監聽器函數來監控指定變數的變化

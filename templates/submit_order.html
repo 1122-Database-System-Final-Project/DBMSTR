@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>Submit Order</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+    <h1>訂單已送出</h1>
+    <h2>訂單編號: {{ booking_result['order_id'] }}</h2>
+    <h2>訂購清單</h2>
+    <ul>
+        {% for item in booking_result['order_list'] %}
+        <li>車廂: {{ item['car_id'] }}, 座位: {{ item['seat_id'] }}, 票種: {{ item['ticket_type'] }}, 票價: {{ item['ticket_price'] }} 元</li>
+        {% endfor %}
+    </ul>
+    <p>總價: {{ booking_result['total_price'] }} 元</p>
+    <p>請在付款到期日 {{ booking_result['pay_expire_date'] }} 之前付款。</p>
+</body>
+</html>

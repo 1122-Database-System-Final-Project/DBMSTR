@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>Confirm to Start</title>
+    <!-- 連結 HTML 和 CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css')}}">
+    <!-- 連結 HTML 和 JS -->
+    <script type="text/javascript" src="{{ url_for('static', filename='js/main.js')}}"></script>
+</head>
+<body>
+    <h1>確認開始訂票</h1>
+    <p>訂票日期: {{ travel_date }}</p>
+    <p>車票數量: {{ counting }}</p>
+    <table>
+        <tr>
+            <th>火車班次</th>
+            <td>{{ train_id }}</td>
+        </tr>
+        <tr>
+            <th>火車類型</th>
+            <td>{{ train_type }}</td>
+        </tr>
+        <tr>
+            <th>離站時間</th>
+            <td>{{ departure_time }}</td>
+        </tr>
+        <tr>
+            <th>到站時間</th>
+            <td>{{ arrival_time }}</td>
+        </tr>
+        <tr>
+            <th>出發車站</th>
+            <td>{{ departure_station }}</td>
+        </tr>
+        <tr>
+            <th>抵達車站</th>
+            <td>{{ arrival_station }}</td>
+        </tr>
+        <tr>
+            <th>剩餘空位數</th>
+            <td>{{ available_seats }}</td>
+        </tr>
+    </table>
+    <form action="{{ url_for('select_seats') }}" method="POST">
+        <input type="hidden" name="train_id" value="{{ train_id }}">
+        <input type="hidden" name="counting" value="{{ counting }}">
+        <button type="submit">確認訂票</button>
+    </form>
+    <form action="{{ url_for('query_train') }}" method="GET">
+        <button type="submit">取消</button>
+    </form>
+</body>
+</html>

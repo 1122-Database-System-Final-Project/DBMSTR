@@ -72,7 +72,9 @@ def select_seats(train_id):
             seats = seat.get_all_available_seats_by_train_id(train_id)
             return render_template('seat_selection.html', train_id=train_id, counting=counting, seats=seats)
     else:
-        return render_template('seat_selection.html', train_id=train_id)
+        counting = int(session["counting"])
+        train_id = int(session["train_id"])
+        return render_template('seat_selection.html', train_id=train_id, counting=counting)
 
 
 @app.route('/confirm_order', methods=['GET', 'POST'])

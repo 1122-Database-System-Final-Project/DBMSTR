@@ -30,7 +30,7 @@ def update_seat_be_seated(seats):
             UPDATE seat 
             SET occupied = 'y' 
             WHERE seat_id = ?
-            ''', (seat,))
+            ''', (seat))
     connection.commit()  
     connection.close()
         
@@ -43,6 +43,6 @@ def delete_seated_seat(seats):
             UPDATE seat 
             SET occupied = 'n'
             WHERE seat_id = ?
-            ''', (seat,))
+            ''', (seat))
     connection.commit() 
     connection.close()

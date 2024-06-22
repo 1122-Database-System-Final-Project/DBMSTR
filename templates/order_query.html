@@ -14,6 +14,8 @@
         <input type="text" id="order_id" name="order_id" required><br>
         <br>
         <input type="submit" value="查詢我的訂單">
+        <br>
+        <a href="{{ url_for('index') }}">返回首頁</a>
     </form>
 
     {% if error_message %}

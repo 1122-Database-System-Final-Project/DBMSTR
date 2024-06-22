@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Confirm Deletion</title>
+</head>
+<body>
+    {% if success_message %}
+        <p style="color:green;">{{ success_message }}</p>
+        <br>
+        <a href="{{ url_for('look_at_my_order') }}">返回查詢訂單</a>
+        <br>
+        <a href="{{ url_for('index') }}">返回首頁</a>
+    {% endif %}
+</body>
+</html>

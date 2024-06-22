@@ -6,9 +6,14 @@ import modules.seat_management as seat
 import modules.order_query as oq
 import modules.order_modification as om
 import modules.order_deletion as od
+import os
 
 app = Flask(__name__)
 app.secret_key = "SECRET_6666"
+
+# 設定資料庫路徑
+BASE_DIRECTORY = os.path.abspath(os.path.dirname(__file__))
+DATABASE = os.path.join(BASE_DIRECTORY, '../database/database.db')
 
 # 首頁
 @app.route('/')
@@ -248,13 +253,28 @@ def delete_order():
         if not order_details:
             error_message = "Order not found"
             return render_template('order_deletion.html', message=error_message,order_id=order_id,id_no=id_no)
-    
-        od.delete_order(order_id,order_details["train_id"])
 
-        success_message = "訂單成功取消"
-        return render_template('order_deletion.html', message=success_message,order_id=order_id,id_no=id_no)
+        return render_template('order_deletion.html',order_id=order_id,id_no=id_no)
     else:
-        return render_template('order_deletion.html', message=None)
+        return render_template('order_deletion.html', order_id=order_id,id_no=id_no)
+
+@app.route('/confirm_delete_order', methods=['POST'])
+def confirm_delete_order():
+    if request.method=='POST':
+        order_id = request.form.get('order_id')
+        id_no = request.form.get('id_no')
+    
+        if not id_no or not order_id:
+            error_message = "Both ID number and Order ID are required."
+            return render_template('order_deletion.html', error_message=error_message, order_id=order_id, id_no=id_no)
+    
+        # 刪除訂單
+        od.delete_order(order_id)
+    
+        success_message = "訂單成功取消"
+        return render_template('confirm_deletion.html', success_message=success_message)
+    else:
+        return render_template('order_deletion.html',order_id=order_id,id_no=id_no)
 
 #查詢列車
 @app.route('/search_trains', methods=['GET'])

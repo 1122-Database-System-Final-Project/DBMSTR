@@ -15,7 +15,7 @@ def get_all_available_seats_by_train_id(train_id):
     cursor.execute('''
                    SELECT seat.seat_id, seat.seat_type, seat.car_id 
                    FROM seat JOIN car ON seat.car_id = car.car_id
-                   WHERE car.train_id = ? AND seat.occupied = ' n'
+                   WHERE car.train_id = ? AND seat.occupied = 'n'
                    ''', (train_id,))
     seats = cursor.fetchall()
     connection.close()
@@ -28,7 +28,7 @@ def update_seat_be_seated(seats):
     for seat in seats:
         cursor.execute('''
             UPDATE seat 
-            SET occupied = ' y' 
+            SET occupied = 'y' 
             WHERE seat_id = ?
             ''', (seat))
     connection.commit()  
@@ -41,7 +41,7 @@ def delete_seated_seat(seats):
     for seat in seats:
         cursor.execute('''
             UPDATE seat 
-            SET occupied = ' n'
+            SET occupied = 'n'
             WHERE seat_id = ?
             ''', (seat))
     connection.commit() 

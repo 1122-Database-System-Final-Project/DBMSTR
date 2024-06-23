@@ -18,10 +18,12 @@
 
     <p>已選座位數: <span id="selected_count">0</span> ；尚需座位數: <span id="remaining_count">{{ counting }}</span></p>
     
-    <form id="seat_form" action="/select_seats" method="POST">
-        <input type="hidden" id="counting" name="counting" value="{{ counting }}">
+    <form id="seat_form" action="/modify_order" method="POST">
         <input type="hidden" name="train_id" value="{{ train_id }}">
-        
+        <input type="hidden" name="order_id" value="{{ order_details.order_id }}">
+        <input type="hidden" name="id_no" value="{{ id_no }}">
+        <input type="hidden" name="selected_seats" id="selected_seats" value="">
+
         {% if error_message %}
         <p style="color: red;">{{ error_message }}</p>
         {% endif %}
@@ -33,7 +35,7 @@
             <li>
                 <label>
                     <input type="checkbox" name="seats" value="{{ seat[0] }}" onclick="selectSeat('{{ seat[0] }}')"> 
-                    {{ seat[2]%10 }}車{{ seat[0]%100 }}號, 座位類型: {{ seat[1] }}
+                    {{ seat[2]%10 }}車{{ seat[0]%100 }}號, Seat Type: {{ seat[1] }}
                 </label>
             </li>
             {% endfor %}
@@ -43,13 +45,6 @@
         {% endif %}
         
         <button type="submit">選好了！</button>
-    </form>
-
-    {% else %}
-    <form action="/select_seats" method="POST">
-        <label for="counting">Enter Number of Seats:</label>
-        <input type="number" id="counting" name="counting" required>
-        <button type="submit">確定</button>
     </form>
     {% endif %}
 

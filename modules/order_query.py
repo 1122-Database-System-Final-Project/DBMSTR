@@ -20,16 +20,15 @@ def query_order(id_no,order_id):
 
     query = """
     SELECT o.order_id, o.train_id, o.departure, o.destination, o.depart_time, o.arrive_time, o.order_status,
-           u.name, u.phone, u.email,o.pay_expire_date, t.ticket_type, COUNT(t.ticket_type) as ticket_count, SUM(t.price) as total_price
+           u.name, u.phone, u.email,o.pay_expire_date,t.car_id,t.seat_id, t.ticket_type, COUNT(t.ticket_type) as ticket_count, SUM(t.price) as total_price
     FROM `order` o
     JOIN `user` u ON o.user_id = u.user_id
     JOIN `ticket` t ON o.order_id = t.order_id
     WHERE u.id_no = ? AND o.order_id = ?
-    GROUP BY t.ticket_type
+    GROUP BY t.ticket_type, t.car_id, t.seat_id
     """
     cur.execute(query, (id_no, order_id))
     rows = cur.fetchall()
-    conn.close()
     
     if rows:
         order_details = {
@@ -46,7 +45,7 @@ def query_order(id_no,order_id):
             "email": rows[0]["email"],
             "tickets": [],
             "total_price": 0,
-            "total_tickets": 0
+            "total_tickets": 0,
         }
 
         total_price = 0
@@ -54,15 +53,15 @@ def query_order(id_no,order_id):
         for row in rows:
             ticket_details = {
                 "ticket_type": row["ticket_type"],
-                "ticket_count": row["ticket_count"]
+                "ticket_count": row["ticket_count"],
+                "car_id": row["car_id"] ,
+                "seat_id": row["seat_id"] 
             }
             order_details["tickets"].append(ticket_details)
             total_price += row["total_price"]
             total_tickets += row["ticket_count"]
-        
         order_details["total_price"] = total_price
         order_details["total_tickets"] = total_tickets
-
         return order_details
     else:
         return None

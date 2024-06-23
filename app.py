@@ -115,13 +115,6 @@ def select_seats():
                 if len(selected_seats) != counting:
                     error_message = f"請再選一次！您應該要選{counting}個座位。"
                     seats = seat.get_all_available_seats_by_train_id(train_id)
-                    seats_list = [list(s) for s in seats]
-                    for s in seats_list:
-                        if s[1]== 'window':
-                            s[1] = '靠窗'
-                        else:
-                            s[1] = '靠走道'
-                    seats = [tuple(s) for s in seats_list]
                     return render_template('seat_selection.html', train_id=train_id, counting=counting, seats=seats, error_message=error_message)
                 else:
                     session['selected_seats'] = selected_seats
@@ -130,13 +123,6 @@ def select_seats():
                     return redirect(url_for('confirm_ticket_type'))
             counting = int(request.form['counting'])
             seats = seat.get_all_available_seats_by_train_id(train_id)
-            seats_list = [list(s) for s in seats]
-            for s in seats_list:
-                if s[1]== 'window':
-                    s[1] = '靠窗'
-                else:
-                    s[1] = '靠走道'
-            seats = [tuple(s) for s in seats_list]
             return render_template('seat_selection.html', train_id=train_id, counting=counting, seats=seats)
     else:
         train_id = int(session['selected_train']["train_id"])

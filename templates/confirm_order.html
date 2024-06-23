@@ -5,21 +5,10 @@
     <title>Comfirm Order</title>
     <!-- 連結 HTML 和 CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css')}}">
-    <!-- 連結 HTML 和 JS -->
-    <script>
-        function submitOrder(event) {
-            event.preventDefault();
-            var form = document.getElementById('order_form');
-            form.action = '/submit_order';
-            form.method = 'POST';
-            form.submit();
-        }
-    </script>
 </head>
 <body>
     <h1>確認訂單</h1>
-    <form id="order_form">
-        
+    <form id="order_form" method="post" action="{{ url_for('confirm_order') }}">
         <h2>訂購清單</h2>
         <table>
             <tr>
@@ -51,7 +40,7 @@
         <label for="email">電子郵件信箱:</label>
         <input type="email" id="email" name="email" required>
         <br>
-        <button type="submit" onclick="submitOrder(event)">送出訂單</button>
+        <button type="submit">送出訂單</button>
     </form>
 </body>
 </html>

@@ -16,19 +16,6 @@ WHERE trim(s1.station_name) = ?
 ORDER BY trim(sb1.departure_time);
 """
 
-def get_stations():
-    try: 
-        conn = sqlite3.connect(db)
-        cursor = conn.cursor()
-        cursor.execute("SELECT station_name FROM station;")
-        result = cursor.fetchall()
-        cursor.close()
-        conn.close()
-        return result
-    except sqlite3.Error as e:
-        print("SQL error: ", e)
-        return None
-
 def train_query(departure, destination, time1, time2):
     try: 
         conn = sqlite3.connect(db)

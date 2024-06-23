@@ -5,22 +5,28 @@
 </head>
 <body>
     <h1>取消訂單</h1>
-    <p>確定要取消此訂單嗎?</p>
-    <p>訂單編號: {{ order_id }}</p>
-    <p>身分證字號: {{ id_no }}</p>
-    <form method="POST" action="{{ url_for('delete_order') }}">
+    <p>您即將取消訂單編號: {{ order_id }}</p>
+    <form method="POST" action="{{ url_for('confirm_delete_order') }}">
         <input type="hidden" name="id_no" value="{{ id_no }}">
         <input type="hidden" name="order_id" value="{{ order_id }}">
         <input type="submit" value="確認取消">
     </form>
+    <br>
     <form action="{{ url_for('look_at_my_order') }}">
+        <input type="hidden" name="id_no" value="{{ id_no }}">
+        <input type="hidden" name="order_id" value="{{ order_id }}">
         <input type="submit" value="不小心按錯">
     </form>
-    {% if message %}
-        <p>{{ message }}</p>
-    {% else %}
-        <p>刪除訂單時發生錯誤。</p>
+    {% if error_message %}
+        <p style="color:red;">{{ error_message }}</p>
     {% endif %}
+    {% if success_message %}
+        <p style="color:green;">{{ success_message }}</p>
+        <br>
+        <a href="{{ url_for('look_at_my_order') }}">返回查詢訂單</a>
+    {% endif %}
+
+    
     <br>
 </body>
 </html>

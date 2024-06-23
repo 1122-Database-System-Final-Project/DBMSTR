@@ -6,9 +6,14 @@ import modules.seat_management as seat
 import modules.order_query as oq
 import modules.order_modification as om
 import modules.order_deletion as od
+import os
 
 app = Flask(__name__)
 app.secret_key = "SECRET_6666"
+
+# 設定資料庫路徑
+BASE_DIRECTORY = os.path.abspath(os.path.dirname(__file__))
+DATABASE = os.path.join(BASE_DIRECTORY, '../database/database.db')
 
 # 首頁
 @app.route('/')
@@ -97,8 +102,9 @@ def confirm_to_start():
 
 # 選座位
 @app.route('/select_seats', methods=['GET', 'POST'])
-def select_seats(train_id):
+def select_seats():
     if request.method == 'POST':
+        train_id = int(request.form.get('train_id'))
         if 'counting' in request.form:
             if 'seats' in request.form:
                 counting = int(request.form['counting'])
@@ -108,40 +114,41 @@ def select_seats(train_id):
                     seats = seat.get_all_available_seats_by_train_id(train_id)
                     return render_template('seat_selection.html', train_id=train_id, counting=counting, seats=seats, error_message=error_message)
                 else:
-                    print(selected_seats)
+                    #print(selected_seats)
+                    seat.update_seat_be_seated(selected_seats)
                     return redirect(url_for('confirm_order', train_id=train_id, seats=','.join(selected_seats)))
             counting = int(request.form['counting'])
             seats = seat.get_all_available_seats_by_train_id(train_id)
             return render_template('seat_selection.html', train_id=train_id, counting=counting, seats=seats)
     else:
+        train_id = int(session['selected_train']["train_id"])
         counting = int(session["counting"])
-        train_id = int(session["train_id"])
         return render_template('seat_selection.html', train_id=train_id, counting=counting)
 
 
 # 確認訂單
-@app.route('/confirm_order', methods=['GET', 'POST'])
+@app.route('/confirm_order', methods=['GET'])
 def confirm_order():
-    if request.method == 'POST':
-        
-        '''
-        order_list 需要再根據前面的部分調整
-        '''
-        order_list = request.form.getlist('order_list') # 獲取訂購清單
-        travel_time = session['selected_train']['travel_time']
+    '''
+    order_list 需要再根據前面的部分調整
+    '''
+    order_list = request.form.getlist('order_list') # 獲取訂購清單
+    travel_time = session['selected_train']['travel_time']
 
-        # 計算票價和總價
-        total_price = 0
-        for item in order_list:
-            price = bk.calculate_ticket_price(travel_time, item['ticket_type'])
-            total_price += price
-            item['ticket_price'] = price
+    # 計算票價和總價
+    total_price = 0
+    for item in order_list:
+        price = bk.calculate_ticket_price(travel_time, item['ticket_type'])
+        total_price += price
+        item['ticket_price'] = price
 
-        # 將訂購清單和票價存入session
-        session['order_list'] = order_list 
-        session['total_price'] = total_price
+    # 將訂購清單和票價存入session
+    session['order_list'] = order_list 
+    session['total_price'] = total_price
+    print(f"order_list:{order_list}")
+    print(f"total_price:{total_price}")
 
-        return render_template('confirm_order.html', order_list=order_list, total_price=total_price)
+    return render_template('confirm_order.html', order_list=order_list, total_price=total_price)
 
 # 送出訂單
 @app.route('/submit_order', methods=['POST'])
@@ -246,13 +253,28 @@ def delete_order():
         if not order_details:
             error_message = "Order not found"
             return render_template('order_deletion.html', message=error_message,order_id=order_id,id_no=id_no)
-    
-        od.delete_order(order_id,order_details["train_id"])
 
-        success_message = "訂單成功取消"
-        return render_template('order_deletion.html', message=success_message,order_id=order_id,id_no=id_no)
+        return render_template('order_deletion.html',order_id=order_id,id_no=id_no)
     else:
-        return render_template('order_deletion.html', message=None)
+        return render_template('order_deletion.html', order_id=order_id,id_no=id_no)
+
+@app.route('/confirm_delete_order', methods=['POST'])
+def confirm_delete_order():
+    if request.method=='POST':
+        order_id = request.form.get('order_id')
+        id_no = request.form.get('id_no')
+    
+        if not id_no or not order_id:
+            error_message = "Both ID number and Order ID are required."
+            return render_template('order_deletion.html', error_message=error_message, order_id=order_id, id_no=id_no)
+    
+        # 刪除訂單
+        od.delete_order(order_id)
+    
+        success_message = "訂單成功取消"
+        return render_template('confirm_deletion.html', success_message=success_message)
+    else:
+        return render_template('order_deletion.html',order_id=order_id,id_no=id_no)
 
 #查詢列車
 @app.route('/search_train', methods=['GET','POST'])
@@ -260,8 +282,8 @@ def search_train():
     if request.method == 'POST':
         departure = "%" + request.form.get('departure') + "%"
         destination = "%" + request.form.get('destination') + "%"
-        departure_time_1 = request.form.get('departure_time1')
-        departure_time_2 = request.form.get('departure_time2')
+        departure_time_1 = request.form.get('departure_time1') + ":00"
+        departure_time_2 = request.form.get('departure_time2') + ":00"
 
         if not departure or not destination or not departure_time_1 or not departure_time_2:
             return jsonify({'error': 'Missing parameters'}), 400

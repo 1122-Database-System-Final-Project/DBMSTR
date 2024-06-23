@@ -65,5 +65,5 @@ def query_order(id_no,order_id):
 
         return order_details
     else:
-        return jsonify({"error": "Order not found"}), 404
+        return None
 

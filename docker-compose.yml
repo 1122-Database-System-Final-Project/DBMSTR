@@ -24,6 +24,9 @@ services:
       - dbms_network
     depends_on:
       - sqlite
+    volumes:
+      - .:/app
+      - ./db/:/my/sqlite/path/
 
 networks:
   dbms_network:

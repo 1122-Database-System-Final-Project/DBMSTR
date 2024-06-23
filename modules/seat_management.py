@@ -22,6 +22,7 @@ def get_all_available_seats_by_train_id(train_id):
     return seats
 
 #更新訂的座位
+# seats = ['511101', '511102']
 def update_seat_be_seated(seats):
     connection = sqlite3.connect(DATABASE)
     cursor = connection.cursor()

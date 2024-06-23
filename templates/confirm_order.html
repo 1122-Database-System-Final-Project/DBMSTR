@@ -6,18 +6,39 @@
     <!-- 連結 HTML 和 CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css')}}">
     <!-- 連結 HTML 和 JS -->
-    <script type="text/javascript" src="{{ url_for('static', filename='js/main.js')}}"></script></head>
+    <script>
+        function submitOrder(event) {
+            event.preventDefault();
+            var form = document.getElementById('order_form');
+            form.action = '/submit_order';
+            form.method = 'POST';
+            form.submit();
+        }
+    </script>
+</head>
 <body>
     <h1>確認訂單</h1>
-    <form action="/submit_order" method="post">
+    <form id="order_form">
+        
         <h2>訂購清單</h2>
-        <ul>
+        <table>
+            <tr>
+                <th>車廂號碼</th>
+                <th>座位號碼</th>
+                <th>車票類型</th>
+                <th>票價</th>
+            </tr>
             {% for item in order_list %}
-            <li>車廂: {{ item['car_id'] }}, 座位: {{ item['seat_id'] }}, 票種: {{ item['ticket_type'] }}, 票價: {{ item['ticket_price'] }} 元</li>
+            <tr>
+                <td>{{ item.car_id }}</td>
+                <td>{{ item.seat_id }}</td>
+                <td>{{ item.ticket_type}}</td>
+                <td>{{ item.ticket_price}}</td>
+            </tr>
             {% endfor %}
-        </ul>
-        <p>總價: {{ total_price }} 元</p>
-        <h2>請輸入聯絡資訊</h2>
+        </table>
+        <p>總價: <span id="total_price">{{ total_price }} 元</span></p>
+        <h2>聯絡資訊</h2>
         <label for="name">姓名:</label>
         <input type="text" id="name" name="name" required>
         <br>
@@ -25,12 +46,12 @@
         <input type="text" id="id_no" name="id_no" required>
         <br>
         <label for="phone">手機號碼:</label>
-        <input type="tel" id="phone" name="phone">
+        <input type="tel" id="phone" name="phone" required>
         <br>
-        <label for="mail">電子郵件信箱:</label>
-        <input type="email" id="mail" name="mail">
+        <label for="email">電子郵件信箱:</label>
+        <input type="email" id="email" name="email" required>
         <br>
-        <button type="submit">送出訂單</button>
+        <button type="submit" onclick="submitOrder(event)">送出訂單</button>
     </form>
 </body>
 </html>

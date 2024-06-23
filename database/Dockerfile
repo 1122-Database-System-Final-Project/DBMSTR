@@ -8,4 +8,4 @@ COPY backup.sq3 /db/
 
 RUN sqlite3 /db/database.db -init /database/backup.sq3
 
-CMD ["sqlite3", "/db/database.db"]
+CMD ["tail", "-f", "/dev/null"]

@@ -29,17 +29,21 @@
         <li>乘車地點: {{ order_details.destination }},{{order_details.departure}}</li>
         <li>乘車時間: {{ order_details.depart_time }}</li>
         <li>預計抵達時間: {{ order_details.arrive_time }}</li>
-        <li>訂單狀態: {{ order_details.order_status }}</li>
-        <li>付款期限: {{order_details.pay_expire_date}}</li>
         <li>訂票人: {{ order_details.name }}</li>
         <li>聯絡電話: {{ order_details.phone }}</li>
         <li>電子信箱: {{ order_details.email }}</li>
         <li>總票數: {{ order_details.total_tickets }}</li>
+        <li>總金額: {{ order_details.total_price }}</li>
+        <li>訂單狀態: {{ order_details.order_status }}</li>
+        <li>付款期限: {{order_details.pay_expire_date}}</li>
         <h3>票券詳情</h3>
         <ul>
             {% for ticket in order_details.tickets %}
                 <li>{{ ticket.ticket_type }}*{{ ticket.ticket_count }}</li>
-                <li>總金額: {{ order_details.total_price }}</li>
+            {% endfor %}
+            {% for seat in order_details.seats %}
+                <li>車廂: {{ seat.car_id | int % 10}}</li>
+                <li>座位: {{ seat.seat_id | int %100}}號</li>
             {% endfor %}
         </ul>
         
@@ -47,6 +51,13 @@
             <input type="hidden" name="id_no" value="{{ id_no }}">
             <input type="hidden" name="order_id" value="{{ order_details.order_id }}">
             <input type="submit" value="取消訂單">
+        </form>
+        &nbsp;
+        <form method="POST" action="{{ url_for('modify_order') }}">
+            <input type="hidden" name="id_no" value="{{ id_no }}">
+            <input type="hidden" name="order_id" value="{{ order_details.order_id }}">
+            <input type="hidden" name="counting" value="{{ order_details.total_tickets }}">
+            <input type="submit" value="修改訂單座位">
         </form>
     {% endif %}
     

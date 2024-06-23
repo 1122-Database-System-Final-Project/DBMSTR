@@ -10,24 +10,40 @@ from flask import Flask, request, jsonify
 BASE_DIRECTORY = os.path.abspath(os.path.dirname(__file__))  # 取得當前檔案所在目錄的絕對路徑
 DATABASE = os.path.join(BASE_DIRECTORY, '../database/database.db')  # 導航到目錄位置
 
-# 更新訂單座位
-def change_my_seat(order_id,train_id,new_seats):
-    connection = sqlite3.connect(DATABASE)
+def find_original_seat(order_id):
+    connection = sqlite3.connect(DATABASE, timeout=20)
     cursor = connection.cursor()
 
     # 查詢訂單原本的座位
     cursor.execute('SELECT seat_id FROM ticket WHERE order_id = ?', (order_id,))
-    original_seats = cursor.fetchall()
+    original_seats = [seat[0] for seat in cursor.fetchall()]
+    connection.commit()
+    connection.close()
+    
+    return original_seats
 
-    # 查詢訂單原本的車廂
-    cursor.execute('SELECT car_id FROM ticket WHERE order_id = ?', (order_id,))
-    original_car = cursor.fetchall()
+# 更新訂單座位
+def change_my_seat(order_id,new_seats):
+    connection = sqlite3.connect(DATABASE, timeout=20)
+    cursor = connection.cursor()
+
+    # 查詢訂單原本的座位
+    cursor.execute('SELECT seat_id FROM ticket WHERE order_id = ?', (order_id,))
+    original_seats = [seat[0] for seat in cursor.fetchall()]
+
+    #更改車票中的資訊
+    for original_seat, new_seat in zip(original_seats, new_seats):
+        cursor.execute('''
+            UPDATE ticket
+            SET seat_id = ?
+            WHERE order_id = ? AND seat_id = ?
+        ''', (new_seat, order_id, original_seat))
     
     # 更新新座位
-    seat.update_seat_be_seated(train_id,original_car, new_seats)
+    #seat.update_seat_be_seated(new_seats)
 
     # 刪除原本座位
-    seat.delete_seated_seat(train_id,original_car, original_seats)
+    #seat.delete_seated_seat(original_seats)
 
     connection.commit()
     connection.close()

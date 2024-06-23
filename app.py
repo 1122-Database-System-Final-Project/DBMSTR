@@ -209,32 +209,82 @@ def modify_order():
     if request.method == 'POST':
         id_no = request.form.get('id_no')
         order_id = request.form.get('order_id')
+        #train_id = int(request.form.get('train_id'))
         if not id_no or not order_id:
             error_message = "Both ID number and Order ID are required."
-            return render_template('order_query.html', message=error_message)
-    
+            return render_template('order_modification.html', message=error_message)
+        
         # 查詢訂單
         order_details = oq.query_order(id_no, order_id)  # 使用從 order_query.py 引用的函數
         if not order_details:
             error_message = "Order not found"
-            return render_template('order_query.html', message=error_message)
-    
+            return render_template('order_modification.html', message=error_message,id_no=id_no,order_id=order_id)
+        
+        counting = order_details["total_tickets"]
         # 找新座位
-        empty_seats = seat.get_all_available_seats_by_train_id(order_details["train_id"])
+        if 'seats' in request.form:
+            print(counting)
+            selected_seats = request.form.getlist('seats')
+            print(selected_seats)
+            if len(selected_seats) != counting:
+                error_message = f"請再選一次！您應該要選{counting}個座位。"
+                seats = seat.get_all_available_seats_by_train_id(order_details["train_id"])
+                return render_template('seat_selection_for_modify.html',order_details=order_details, train_id=order_details["train_id"], counting=counting, seats=seats, error_message=error_message)                
+            else:
+                #print(selected_seats)
+                seat.update_seat_be_seated(selected_seats)
+                return render_template('confirm_modification.html',order_details=order_details, train_id=order_details["train_id"], seats=','.join(selected_seats),order_id=order_id)            
+                #return redirect(url_for('confirm_omodification', order_details=order_details, train_id=order_details["train_id"], seats=','.join(selected_seats),order_id=order_id))
+        #counting = int(request.form['counting'])
+        seats = seat.get_all_available_seats_by_train_id(order_details["train_id"])
+        return render_template('seat_selection_for_modify.html',order_details=order_details, train_id=order_details["train_id"], counting=counting, seats=seats)
+        
+        #order_details["total_tickets"] = int(request.form['counting'])
+        #seats = seat.get_all_available_seats_by_train_id(order_details["train_id"])
+        #return render_template('seat_selection_for_modify.html', order_details=order_details,train_id=order_details["train_id"], counting=order_details["total_tickets"], seats=seats)
 
-        new_seats = request.form.getlist('new_seats')
-        if not new_seats:
-            error_message = "No seats selected"
-            return render_template('order_modification.html', message=error_message)
+    elif request.method == 'GET':
+        id_no = request.args.get('id_no')
+        order_id = request.args.get('order_id')
+        if not id_no or not order_id:
+            error_message = "Both ID number and Order ID are required."
+            return render_template('confirm_modification.html', message=error_message)
+        
+        # 查詢訂單
+        order_details = oq.query_order(id_no, order_id)
+        if not order_details:
+            error_message = "Order not found"
+            return render_template('confirm_modification.html', order_details=order_details,message=error_message, id_no=id_no, order_id=order_id)
+        
+        seats = seat.get_all_available_seats_by_train_id(order_details["train_id"])
+        return render_template('seat_selection_for_modify.html',order_details=order_details, train_id=order_details["train_id"], counting=order_details["total_tickets"], seats=seats)
+    
 
-        # 更新座位
-        om.change_my_seat(order_id, order_details["train_id"], new_seats)
-
-        success_message = "Order updated successfully"
-        return render_template('order_modification.html', message=success_message)
-    else:
-        return render_template('order_modification.html', message=None)
-
+@app.route('/confirm_modification', methods=['GET','POST'])
+def confirm_modification():
+    if request.method == 'POST':
+        order_id = request.form.get('order_id')
+        selected_seats = request.form.get('selected_seats').split(',')
+        original_seats=om.find_original_seat(order_id)
+        seat.delete_seated_seat(original_seats)
+        seat.update_seat_be_seated(selected_seats)
+        om.change_my_seat(order_id,selected_seats)
+        success_message = "訂單修改成功！"
+        return render_template('modification_success.html', success_message=success_message)
+    
+    # 如果是GET請求，顯示確認修改頁面
+    train_id = request.args.get('train_id')
+    seats = request.args.get('new_seats').split(',')
+    order_id = request.args.get('order_id')
+    
+    order_details = {
+        "order_id":order_id,
+        "train_id": train_id,
+        "new_seats": seats,
+    }
+    
+    return render_template('confirm_modification.html', order_details=order_details)
+    
 
 
 #刪除訂單

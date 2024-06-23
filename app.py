@@ -6,9 +6,14 @@ import modules.seat_management as seat
 import modules.order_query as oq
 import modules.order_modification as om
 import modules.order_deletion as od
+import os
 
 app = Flask(__name__)
 app.secret_key = "SECRET_6666"
+
+# 設定資料庫路徑
+BASE_DIRECTORY = os.path.abspath(os.path.dirname(__file__))
+DATABASE = os.path.join(BASE_DIRECTORY, '../database/database.db')
 
 # 首頁
 @app.route('/')
@@ -114,9 +119,8 @@ def select_seats():
                 else:
                     session['selected_seats'] = selected_seats
                     print(f"selected_seats: {selected_seats}")
-                    # return redirect(url_for('confirm_order', train_id=train_id, seats=','.join(selected_seats)))
+                    seat.update_seat_be_seated(selected_seats)
                     return redirect(url_for('confirm_ticket_type'))
-                
             counting = int(request.form['counting'])
             seats = seat.get_all_available_seats_by_train_id(train_id)
             return render_template('seat_selection.html', train_id=train_id, counting=counting, seats=seats)
@@ -310,29 +314,48 @@ def delete_order():
         if not order_details:
             error_message = "Order not found"
             return render_template('order_deletion.html', message=error_message,order_id=order_id,id_no=id_no)
-    
-        od.delete_order(order_id,order_details["train_id"])
 
-        success_message = "訂單成功取消"
-        return render_template('order_deletion.html', message=success_message,order_id=order_id,id_no=id_no)
+        return render_template('order_deletion.html',order_id=order_id,id_no=id_no)
     else:
-        return render_template('order_deletion.html', message=None)
+        return render_template('order_deletion.html', order_id=order_id,id_no=id_no)
+
+@app.route('/confirm_delete_order', methods=['POST'])
+def confirm_delete_order():
+    if request.method=='POST':
+        order_id = request.form.get('order_id')
+        id_no = request.form.get('id_no')
+    
+        if not id_no or not order_id:
+            error_message = "Both ID number and Order ID are required."
+            return render_template('order_deletion.html', error_message=error_message, order_id=order_id, id_no=id_no)
+    
+        # 刪除訂單
+        od.delete_order(order_id)
+    
+        success_message = "訂單成功取消"
+        return render_template('confirm_deletion.html', success_message=success_message)
+    else:
+        return render_template('order_deletion.html',order_id=order_id,id_no=id_no)
 
 #查詢列車
-@app.route('/search_trains', methods=['GET'])
-def search_trains():
-    departure = request.args.get('departure')
-    destination = request.args.get('destination')
-    date = request.args.get('date')
+@app.route('/search_train', methods=['GET','POST'])
+def search_train():
+    if request.method == 'POST':
+        departure = request.form.get('departure')
+        destination = request.form.get('destination')
+        departure_time_1 = request.form.get('departure_time1')
+        departure_time_2 = request.form.get('departure_time2') 
 
-    if not departure or not destination or not date:
-        return jsonify({'error': 'Missing parameters'}), 400
+        if not departure or not destination or not departure_time_1 or not departure_time_2:
+            return jsonify({'error': 'Missing parameters'}), 400
 
-    trains = train_query(departure, destination, date)
-    if not trains:
-        return jsonify({'error': 'No trains found for the given parameters'}), 404
-    
-    return jsonify(trains)
+        trains = train_query(departure, destination, departure_time_1, departure_time_2)
+        if not trains:
+            return jsonify({'error': 'No trains found for the given parameters'}), 404
+        
+        return render_template('search_train_result.html', trains=trains)
+    else:
+        return render_template('search_train.html')
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=8000)

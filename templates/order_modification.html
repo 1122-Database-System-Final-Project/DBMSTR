@@ -4,31 +4,10 @@
     <title>Modify Order</title>
 </head>
 <body>
-    <h1>Modify Order</h1>
+    <h1>修改訂單hi</h1>
     {% if message %}
         <p>{{ message }}</p>
     {% endif %}
-    <form method="POST" action="{{ url_for('modify_order') }}">
-        <label for="id_no">ID Number:</label>
-        <input type="text" name="id_no" id="id_no" required><br>
-
-        <label for="order_id">Order ID:</label>
-        <input type="text" name="order_id" id="order_id" required><br>
-
-        {% if order_details %}
-            <h2>Order Details</h2>
-            <p>Train ID: {{ order_details.train_id }}</p>
-            <p>Current Seat ID: {{ order_details.seat_id }}</p>
-            
-            <h2>Available Seats</h2>
-            <label for="new_seat_id">Select New Seat:</label>
-            <select name="new_seats" id="new_seat_id" required>
-                {% for seat in empty_seats %}
-                        <input type="checkbox" id="seat{{ seat.id }}" name="new_seats" value="{{ seat.id }}">
-                        <label for="seat{{ seat.id }}">{{ seat.id }}</label>
-                    {% endfor %}
-            </select><br>
-        {% endif %}
         <button type="submit">Modify Order</button>
     </form>
 </body>

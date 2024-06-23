@@ -24,7 +24,7 @@ def get_all_available_seats_by_train_id(train_id):
 #更新訂的座位
 # seats = ['511101', '511102']
 def update_seat_be_seated(seats):
-    connection = sqlite3.connect(DATABASE)
+    connection = sqlite3.connect(DATABASE, timeout=20)
     cursor = connection.cursor()
     for seat in seats:
         cursor.execute('''
@@ -37,7 +37,7 @@ def update_seat_be_seated(seats):
         
 #刪除先前訂的座位
 def delete_seated_seat(seats):
-    connection = sqlite3.connect(DATABASE)
+    connection = sqlite3.connect(DATABASE, timeout=20)
     cursor = connection.cursor()
     for seat in seats:
         cursor.execute('''

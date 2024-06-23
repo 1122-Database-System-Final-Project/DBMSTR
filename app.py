@@ -277,20 +277,24 @@ def confirm_delete_order():
         return render_template('order_deletion.html',order_id=order_id,id_no=id_no)
 
 #查詢列車
-@app.route('/search_trains', methods=['GET'])
-def search_trains():
-    departure = request.args.get('departure')
-    destination = request.args.get('destination')
-    date = request.args.get('date')
+@app.route('/search_train', methods=['GET','POST'])
+def search_train():
+    if request.method == 'POST':
+        departure = "%" + request.form.get('departure') + "%"
+        destination = "%" + request.form.get('destination') + "%"
+        departure_time_1 = request.form.get('departure_time1') + ":00"
+        departure_time_2 = request.form.get('departure_time2') + ":00"
 
-    if not departure or not destination or not date:
-        return jsonify({'error': 'Missing parameters'}), 400
+        if not departure or not destination or not departure_time_1 or not departure_time_2:
+            return jsonify({'error': 'Missing parameters'}), 400
 
-    trains = train_query(departure, destination, date)
-    if not trains:
-        return jsonify({'error': 'No trains found for the given parameters'}), 404
-    
-    return jsonify(trains)
+        trains = train_query(departure, destination, departure_time_1, departure_time_2)
+        if not trains:
+            return jsonify({'error': 'No trains found for the given parameters'}), 404
+        
+        return render_template('search_train_result.html', trains=trains)
+    else:
+        return render_template('search_train.html')
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=8000)

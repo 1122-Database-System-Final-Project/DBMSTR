@@ -11,8 +11,11 @@
         <thead>
             <tr>
                 <th>車次</th>
+                <th>火車類型</th>
                 <th>出發時間</th>
                 <th>抵達時間</th>
+                <th>出發車站</th>
+                <th>抵達車站</th>
             </tr>
         </thead>
         <tbody>
@@ -21,14 +24,9 @@
                 <td>{{ train[0] }}</td>
                 <td>{{ train[1] }}</td>
                 <td>{{ train[2] }}</td>
-                <td><form action="/result_train" method="POST">
-                    <input type="hidden" name="train_id" value="{{ train[0] }}">
-                    <input type="hidden" name="train_type" value="{{ train[1] }}">
-                    <input type="hidden" name="departure_time" value="{{ train[2] }}">
-                    <input type="hidden" name="arrival_time" value="{{ train[3] }}">
-                    <input type="hidden" name="departure_station" value="{{ train[4] }}">
-                    <input type="hidden" name="arrival_station" value="{{ train[5] }}">
-                </form></td>
+                <td>{{ train[3] }}</td>
+                <td>{{ train[4] }}</td>
+                <td>{{ train[5] }}</td>
             </tr>
             {% endfor %}
         </tbody>

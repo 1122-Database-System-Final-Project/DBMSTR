@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>查詢結果</title>
+</head>
+<body>
+    <h1>查詢結果</h1>
+    
+    {% if trains %}
+    <table>
+        <thead>
+            <tr>
+                <th>車次</th>
+                <th>出發時間</th>
+                <th>抵達時間</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for train in trains %}
+            <tr>
+                <td>{{ train[0] }}</td>
+                <td>{{ train[1] }}</td>
+                <td>{{ train[2] }}</td>
+                <td><form action="/result_train" method="POST">
+                    <input type="hidden" name="train_id" value="{{ train[0] }}">
+                    <input type="hidden" name="train_type" value="{{ train[1] }}">
+                    <input type="hidden" name="departure_time" value="{{ train[2] }}">
+                    <input type="hidden" name="arrival_time" value="{{ train[3] }}">
+                    <input type="hidden" name="departure_station" value="{{ train[4] }}">
+                    <input type="hidden" name="arrival_station" value="{{ train[5] }}">
+                </form></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>沒有符合條件的車次</p>
+    {% endif %}
+
+</body>
+</html>

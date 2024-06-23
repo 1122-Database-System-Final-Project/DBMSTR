@@ -21,6 +21,7 @@
     <form id="seat_form" action="/modify_order" method="POST">
         <input type="hidden" name="train_id" value="{{ train_id }}">
         <input type="hidden" name="order_id" value="{{ order_details.order_id }}">
+        <input type="hidden" name="id_no" value="{{ id_no }}">
         <input type="hidden" name="selected_seats" id="selected_seats" value="">
 
         {% if error_message %}

@@ -268,7 +268,7 @@ def look_at_my_order():
             return render_template('order_query.html', order_details=None, error_message=error_message)
 
         order_details = oq.query_order(id_no, order_id)
-
+        #print(order_details["seats"])
         if order_details:
             return render_template('order_query.html', order_details=order_details, error_message=None,id_no=id_no)
         else:
@@ -284,7 +284,6 @@ def modify_order():
     if request.method == 'POST':
         id_no = request.form.get('id_no')
         order_id = request.form.get('order_id')
-        #train_id = int(request.form.get('train_id'))
         if not id_no or not order_id:
             error_message = "Both ID number and Order ID are required."
             return render_template('order_modification.html', message=error_message)
@@ -295,29 +294,27 @@ def modify_order():
             error_message = "Order not found"
             return render_template('order_modification.html', message=error_message,id_no=id_no,order_id=order_id)
         
+        #刪除原本座位狀態
+        original_seats=om.find_original_seat(order_id)
+        seat.delete_seated_seat(original_seats) 
+
         counting = order_details["total_tickets"]
         # 找新座位
         if 'seats' in request.form:
-            print(counting)
             selected_seats = request.form.getlist('seats')
             print(selected_seats)
             if len(selected_seats) != counting:
                 error_message = f"請再選一次！您應該要選{counting}個座位。"
-                seats = seat.get_all_available_seats_by_train_id(order_details["train_id"])
-                return render_template('seat_selection_for_modify.html',order_details=order_details, train_id=order_details["train_id"], counting=counting, seats=seats, error_message=error_message)                
+                empty_seats = seat.get_all_available_seats_by_train_id(order_details["train_id"])
+                return render_template('seat_selection_for_modify.html',order_details=order_details, train_id=order_details["train_id"], counting=counting, seats=empty_seats, error_message=error_message,id_no=id_no)                
             else:
-                #print(selected_seats)
-                seat.update_seat_be_seated(selected_seats)
-                return render_template('confirm_modification.html',order_details=order_details, train_id=order_details["train_id"], seats=','.join(selected_seats),order_id=order_id)            
-                #return redirect(url_for('confirm_omodification', order_details=order_details, train_id=order_details["train_id"], seats=','.join(selected_seats),order_id=order_id))
-        #counting = int(request.form['counting'])
-        seats = seat.get_all_available_seats_by_train_id(order_details["train_id"])
-        return render_template('seat_selection_for_modify.html',order_details=order_details, train_id=order_details["train_id"], counting=counting, seats=seats)
-        
-        #order_details["total_tickets"] = int(request.form['counting'])
-        #seats = seat.get_all_available_seats_by_train_id(order_details["train_id"])
-        #return render_template('seat_selection_for_modify.html', order_details=order_details,train_id=order_details["train_id"], counting=order_details["total_tickets"], seats=seats)
+                #selected_seats = [int(seat) for seat in selected_seats]
+                print(selected_seats)
+                return render_template('confirm_modification.html',order_details=order_details, train_id=order_details["train_id"], seats=selected_seats,order_id=order_id,id_no=id_no)            
 
+        empty_seats = seat.get_all_available_seats_by_train_id(order_details["train_id"])
+        return render_template('seat_selection_for_modify.html',order_details=order_details, train_id=order_details["train_id"], counting=counting, seats=empty_seats,id_no=id_no)
+        
     elif request.method == 'GET':
         id_no = request.args.get('id_no')
         order_id = request.args.get('order_id')
@@ -339,9 +336,10 @@ def modify_order():
 def confirm_modification():
     if request.method == 'POST':
         order_id = request.form.get('order_id')
-        selected_seats = request.form.get('selected_seats').split(',')
-        original_seats=om.find_original_seat(order_id)
-        seat.delete_seated_seat(original_seats)
+        selected_seats = request.form.get('selected_seats')
+        if isinstance(selected_seats, str):
+            selected_seats = [int(seat.strip().replace("'", "")) for seat in selected_seats.strip('[]').split(',')]
+        print("select: ",selected_seats)
         seat.update_seat_be_seated(selected_seats)
         om.change_my_seat(order_id,selected_seats)
         success_message = "訂單修改成功！"
@@ -382,6 +380,7 @@ def delete_order():
         return render_template('order_deletion.html',order_id=order_id,id_no=id_no)
     else:
         return render_template('order_deletion.html', order_id=order_id,id_no=id_no)
+
 
 @app.route('/confirm_delete_order', methods=['POST'])
 def confirm_delete_order():

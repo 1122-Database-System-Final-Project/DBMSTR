@@ -39,11 +39,14 @@
         <h3>票券詳情</h3>
         <ul>
             {% for ticket in order_details.tickets %}
-                <li>{{ ticket.ticket_type }}*{{ ticket.ticket_count }}</li>
-            {% endfor %}
-            {% for seat in order_details.seats %}
-                <li>車廂: {{ seat.car_id | int % 10}}</li>
-                <li>座位: {{ seat.seat_id | int %100}}號</li>
+                <li>
+                    車票 {{ loop.index }}
+                    <ul>
+                        <li>票種: {{ ticket.ticket_type }}</li>
+                        <li>車廂: {{ ticket.car_id % 10 }}車</li>
+                        <li>座位: {{ ticket.seat_id % 100 }}號</li>
+                    </ul>
+                </li>
             {% endfor %}
         </ul>
         

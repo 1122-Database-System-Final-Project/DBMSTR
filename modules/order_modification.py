@@ -33,17 +33,12 @@ def change_my_seat(order_id,new_seats):
 
     #更改車票中的資訊
     for original_seat, new_seat in zip(original_seats, new_seats):
+        new_car_id= new_seat// 100
         cursor.execute('''
             UPDATE ticket
-            SET seat_id = ?
+            SET seat_id = ? ,car_id = ?
             WHERE order_id = ? AND seat_id = ?
-        ''', (new_seat, order_id, original_seat))
+        ''', (new_seat,new_car_id, order_id, original_seat))
     
-    # 更新新座位
-    #seat.update_seat_be_seated(new_seats)
-
-    # 刪除原本座位
-    #seat.delete_seated_seat(original_seats)
-
     connection.commit()
     connection.close()

@@ -15,13 +15,14 @@ def get_all_available_seats_by_train_id(train_id):
     cursor.execute('''
                    SELECT seat.seat_id, seat.seat_type, seat.car_id 
                    FROM seat JOIN car ON seat.car_id = car.car_id
-                   WHERE car.train_id = ? AND seat.occupied = 'n'
+                   WHERE car.train_id = ? AND trim(seat.occupied) = 'n'
                    ''', (train_id,))
     seats = cursor.fetchall()
     connection.close()
     return seats
 
 #更新訂的座位
+# seats = ['511101', '511102']
 def update_seat_be_seated(seats):
     connection = sqlite3.connect(DATABASE)
     cursor = connection.cursor()
@@ -30,7 +31,7 @@ def update_seat_be_seated(seats):
             UPDATE seat 
             SET occupied = 'y' 
             WHERE seat_id = ?
-            ''', (seat))
+            ''', (seat,))
     connection.commit()  
     connection.close()
         

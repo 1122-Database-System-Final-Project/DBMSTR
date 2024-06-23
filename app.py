@@ -280,10 +280,10 @@ def confirm_delete_order():
 @app.route('/search_train', methods=['GET','POST'])
 def search_train():
     if request.method == 'POST':
-        departure = "%" + request.form.get('departure') + "%"
-        destination = "%" + request.form.get('destination') + "%"
-        departure_time_1 = request.form.get('departure_time1') + ":00"
-        departure_time_2 = request.form.get('departure_time2') + ":00"
+        departure = request.form.get('departure')
+        destination = request.form.get('destination')
+        departure_time_1 = request.form.get('departure_time1')
+        departure_time_2 = request.form.get('departure_time2') 
 
         if not departure or not destination or not departure_time_1 or not departure_time_2:
             return jsonify({'error': 'Missing parameters'}), 400

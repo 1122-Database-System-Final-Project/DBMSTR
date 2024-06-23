@@ -242,7 +242,7 @@ def book_seat(selected_train, order_list, total_price, user):
             print("INSERT OR IGNORE INTO ticket")
         
         print(f"seats: {seats}")
-        sm.update_seat_be_seated(seats)
+        # sm.update_seat_be_seated(seats)
         
         connection.commit()
         

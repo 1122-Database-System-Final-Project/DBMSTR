@@ -33,13 +33,13 @@ def query_train():
         session["travel_date"] = request.form.get('travel_date') 
         start_time = request.form.get('start_time')
         end_time = request.form.get('end_time')
-        departure = '%' + request.form.get('departure') + '%'
-        destination = '%' + request.form.get('destination') + '%'
+        departure = request.form.get('departure')
+        destination = request.form.get('destination')
         '''
         用 session 儲存 counting
         '''
         session["counting"] = request.form.get('counting') # 後面會用到, 用 session 儲存
-        train_type = '%' + request.form.get('train_type') + '%' # train_type 有 "自強", "莒光"
+        train_type = request.form.get('train_type') # train_type 有 "自強", "莒光"
 
         # 檢查是否成功取得資料
         counting = int(session["counting"])
@@ -49,7 +49,7 @@ def query_train():
         
         # 成功取得資料後, 導航到查詢結果頁面
         trains = result["data"]
-        # trains 資訊包含 train.train_id, train.train_type, train_departure_time, train_arrival_time, departure_station, arrival_station, available_seats
+        # trains 資訊包含 train.train_id, train.train_type, train_depart_time, train_arrive_time, departure, destination, available_seats
         # 例如 [(511, ' 08:43:00', ' 10:43:00', ' 七堵', ' 新竹', 80)]
         
         return render_template('query_train_results.html', trains=trains)
@@ -72,33 +72,36 @@ def confirm_to_start():
 
     train_id = request.form.get('train_id')
     train_type = request.form.get('train_type')
-    depart_time = request.form.get('departure_time').strip()
-    arrival_time = request.form.get('arrival_time').strip()
-    departure_station = request.form.get('departure_station')
-    arrival_station = request.form.get('arrival_station')
+    depart_time = request.form.get('train_depart_time').strip()
+    arrive_time = request.form.get('train_arrive_time').strip()
+    departure = request.form.get('departure')
+    destination = request.form.get('destination')
     available_seats = request.form.get('available_seats')
-    travel_date = session.get('travel_date')
+    travel_date = session.get('travel_date').strip()
     counting = session.get('counting')
                             
     cvt_depart_time = datetime.strptime(depart_time, '%H:%M:%S')
-    cvt_arrival_time = datetime.strptime(arrival_time, '%H:%M:%S')
-    travel_time = (cvt_arrival_time - cvt_depart_time).seconds / 60 # 旅程時間轉換成分鐘數
+    cvt_arrive_time = datetime.strptime(arrive_time, '%H:%M:%S')
+    travel_time = (cvt_arrive_time - cvt_depart_time).seconds / 60 # 旅程時間轉換成分鐘數
+    print(f"travel_time: {travel_time}")
 
     # 用一個 session 儲存使用者選擇的車次資料
     session['selected_train'] = {
         'train_id' : train_id,
         'train_type' : train_type,
         'depart_time' : depart_time,
-        'arrival_time' : arrival_time,
+        'arrive_time' : arrive_time,
         'travel_time' : travel_time,
-        'departure' : departure_station,
-        'destination' : arrival_station
+        'departure' : departure,
+        'destination' : destination
     }
     
-    return render_template('confirm_to_start.html', train_id=train_id, train_type=train_type,
-                        departure_time=depart_time, arrival_time=arrival_time,
-                        departure_station=departure_station, arrival_station=arrival_station,
-                        available_seats=available_seats, travel_date=travel_date, counting=counting)
+    return render_template('confirm_to_start.html', 
+                            train_id=train_id, train_type=train_type,
+                            departure_time=depart_time, arrive_time=arrive_time,
+                            departure=departure, destination=destination,
+                            available_seats=available_seats, travel_date=travel_date, 
+                            counting=counting)
 
 # 選座位
 @app.route('/select_seats', methods=['GET', 'POST'])
@@ -114,9 +117,10 @@ def select_seats():
                     seats = seat.get_all_available_seats_by_train_id(train_id)
                     return render_template('seat_selection.html', train_id=train_id, counting=counting, seats=seats, error_message=error_message)
                 else:
-                    #print(selected_seats)
+                    session['selected_seats'] = selected_seats
+                    print(f"selected_seats: {selected_seats}")
                     seat.update_seat_be_seated(selected_seats)
-                    return redirect(url_for('confirm_order', train_id=train_id, seats=','.join(selected_seats)))
+                    return redirect(url_for('confirm_ticket_type'))
             counting = int(request.form['counting'])
             seats = seat.get_all_available_seats_by_train_id(train_id)
             return render_template('seat_selection.html', train_id=train_id, counting=counting, seats=seats)
@@ -125,43 +129,61 @@ def select_seats():
         counting = int(session["counting"])
         return render_template('seat_selection.html', train_id=train_id, counting=counting)
 
+# 確認票種
+@app.route('/confirm_ticket_type', methods=['GET', 'POST'])
+def confirm_ticket_type():
+    # 獲取選擇座位 selected_seats, 內容是 ['511101', '511102', ...], 若座位為空則得到 []
+    selected_seats = session.get('selected_seats', []) 
+    # 建立一個 order_list 
+    order_list = bk.create_order_list(selected_seats)
+    print(f"order_list in '/confirm_ticket_type' before 'POST': {order_list}")
+
+    # 取得使用者提交的資訊
+    if request.method == 'POST':
+        # travel_time = session['selected_train']['travel_time']
+        travel_time = session.get('selected_train', {}).get('travel_time', 0)
+        print(f"order_list after 'POST': {order_list}")
+        # 更新 order_list 中的 ticket_type 並計算票價
+        total_price = 0
+        for item in order_list:
+            item['ticket_type'] = request.form.get(f'ticket_type_{item["seat_id"]}', '一般')
+            item['ticket_price'] = bk.calculate_ticket_price(travel_time, item['ticket_type'])
+            total_price += item['ticket_price']
+
+        # 將訂購清單和票價存入session
+        session['order_list'] = order_list 
+        session['total_price'] = total_price
+        print(f"order_list after save to session: {session['order_list']}")
+        print(f"total_price after save to session: :{session['total_price']}")
+
+        print("'POST' before render_template('confirm_order.html).")
+        return render_template('confirm_order.html', 
+                           order_list=order_list, 
+                           total_price=total_price)
+
+    # 提供網頁顯示需要的資料
+    else:
+        print("'GET' before render_template.")
+        return render_template('confirm_ticket_type.html',
+                               order_list=order_list)
+
 
 # 確認訂單
-@app.route('/confirm_order', methods=['GET'])
+@app.route('/confirm_order', methods=['GET', 'POST'])
 def confirm_order():
-    '''
-    order_list 需要再根據前面的部分調整
-    '''
-    order_list = request.form.getlist('order_list') # 獲取訂購清單
-    travel_time = session['selected_train']['travel_time']
 
-    # 計算票價和總價
-    total_price = 0
-    for item in order_list:
-        price = bk.calculate_ticket_price(travel_time, item['ticket_type'])
-        total_price += price
-        item['ticket_price'] = price
-
-    # 將訂購清單和票價存入session
-    session['order_list'] = order_list 
-    session['total_price'] = total_price
-    print(f"order_list:{order_list}")
-    print(f"total_price:{total_price}")
-
-    return render_template('confirm_order.html', order_list=order_list, total_price=total_price)
-
-# 送出訂單
-@app.route('/submit_order', methods=['POST'])
-def submit_order():
+    # 取得使用者提交的資訊
     if request.method == 'POST':
         # 獲取聯絡資訊
         name = request.form['name']
         id_no = request.form['id_no']
         phone = request.form.get('phone')
         email = request.form.get('email')
+        
         # 檢查聯絡資訊的格式正確性
         if not name or not id_no:
             return "聯絡資訊錯誤，請重新填寫", 400
+        
         # 儲存使用者資料
         session['user'] = {
             'name' : name,
@@ -169,17 +191,56 @@ def submit_order():
             'phone' : phone,
             'email' : email
         }
+        print(f"user after save to session: {session['user']}")
+
+        return redirect(url_for('submit_order'), code=307)  # 使用code=307保持POST方法
+    else:
+        
+        order_list = session.get('order_list', [])
+        total_price = session.get('total_price', 0)
+        print(f"order_list in 'confirm_order': {order_list}")
+        print(f"total_price in 'confirm_order': {total_price}")
+        return render_template('confirm_order.html', order_list=order_list, total_price=total_price)
+
+# 提供一個後端API端點, 當使用者在confirm_order.html中選擇車票類型時會觸發function updateTotalPrice()
+# 這個函式使用fetch API發送POST請求到/calculate_ticket_price
+@app.route('/calculate_ticket_price_api', methods=['POST'])
+def calculate_ticket_price_api():
+    data = request.json
+    seat_id = data.get('seat_id')
+    ticket_type = data.get('ticket_type')
+
+    travel_time = session.get('selected_train', {}).get('travel_time', 0)
+    price = bk.calculate_ticket_price(travel_time, ticket_type)
+
+    return jsonify({'price': price})
+
+# 送出訂單
+@app.route('/submit_order', methods=['POST', 'GET'])
+def submit_order():
+    if request.method == 'POST':
         # 獲取訂購清單和票價信息
-        selected_train = session['selected_train']
-        order_list = session['order_list']
-        total_price = session['total_price']
-        user = session['user']
-  
+        selected_train = session.get('selected_train', {})
+        order_list = session.get('order_list', [])
+        total_price = session.get('total_price', 0)
+        user = session.get('user', {})
+
+        print(f"selected_train: {selected_train}")
+        print(f"order_list: {order_list}")
+        print(f"selectetotal_priced_train: {total_price}")
+        print(f"user: {user}")
+
         # 產生訂單和車票編號，並更新資料庫
         result = bk.book_seat(selected_train, order_list, total_price, user)
-        booking_result = result['data']
+        print(f"result: {result}")
+        if result["status"] == "error":
+            return render_template('submit_order.html', booking_result=[], error_message=result["message"])
+        
+        booking_result = result["data"]
         return render_template('submit_order.html', booking_result=booking_result)
-
+    else:
+        # 處理直接訪問/submit_order頁面的情況
+        return redirect(url_for('confirm_order'))
 
 #查詢訂單
 @app.route('/query_order', methods=['GET', 'POST'])

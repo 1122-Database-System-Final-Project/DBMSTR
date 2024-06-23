@@ -44,6 +44,6 @@ def delete_seated_seat(seats):
             UPDATE seat 
             SET occupied = 'n'
             WHERE seat_id = ?
-            ''', (seat))
+            ''', (seat,))
     connection.commit() 
     connection.close()

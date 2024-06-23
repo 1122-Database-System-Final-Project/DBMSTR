@@ -163,8 +163,6 @@ def book_seat(selected_train, order_list, total_price, user):
     cursor = connection.cursor()
 
     try:
-
-        '''print(f"User: {user}")'''
         ### 新增使用者, 訂單, 票
         # 產生使用者編號
         cursor.execute('''
@@ -182,7 +180,7 @@ def book_seat(selected_train, order_list, total_price, user):
         user_params = [next_user_id, user['id_no'], user['name'], user['phone'], user['email']]
         print(f"user_params: {user_params}")
         cursor.execute(user_query, user_params)
-        print("INSERT OR IGNORE INTO user")
+        print("INSERT user success.")
 
         # 產生訂單編號
         cursor.execute('''
@@ -217,14 +215,11 @@ def book_seat(selected_train, order_list, total_price, user):
         order_params = [next_order_id, train_id, departure, destination, depart_time, arrive_time, next_user_id, order_status, pay_expire_date, booking_timestamp]
         print(f"order_params: {order_params}")
         cursor.execute(order_query, order_params)
-        print("INSERT OR IGNORE INTO [order]")
+        print("INSERT [order] success.")
         
         # 產生車票編號
-        seats = [] # 內容是 ['511101', '511102', ...]
         for item in order_list:
             # 更新座位狀態
-            seats.append(item['seat_id']) 
-
             cursor.execute('''
                            SELECT MAX(ticket_id) 
                            FROM ticket
@@ -239,10 +234,22 @@ def book_seat(selected_train, order_list, total_price, user):
             ticket_params = [next_icket_id, item['ticket_type'], item['ticket_price'], item['car_id'], item['seat_id'], next_order_id]
             print(f"ticket_params: {ticket_params}")
             cursor.execute(ticket_query, ticket_params)
-            print("INSERT OR IGNORE INTO ticket")
+            print("INSERT ticke success.t")
+
+        # 更新座位狀態
+        seats = [] # 內容是 ['511101', '511102', ...]
+        for item in order_list:
+            # 更新座位狀態
+            seats.append(item['seat_id']) 
         
         print(f"seats: {seats}")
-        # sm.update_seat_be_seated(seats)
+        for seat in seats:
+            cursor.execute('''
+                UPDATE seat 
+                SET occupied = 'y' 
+                WHERE seat_id = ?
+                ''', (seat,))
+        print("UPDATE seat success.")
         
         connection.commit()
         

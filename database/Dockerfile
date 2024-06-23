@@ -2,8 +2,10 @@ FROM alpine:latest
 
 RUN apk add --update sqlite
 
-WORKDIR /database
+WORKDIR /db
 
-COPY backup.sq3 /database/
+COPY backup.sq3 /db/
 
-RUN sqlite3 /database/database.db -init /database/backup.sq3
+RUN sqlite3 /db/database.db -init /database/backup.sq3
+
+CMD ["sqlite3", "/db/database.db"]

@@ -5,7 +5,8 @@ document.addEventListener('DOMContentLoaded', function() {
     generateTimeOptions(document.getElementById('start_time'));
     generateTimeOptions(document.getElementById('end_time'));
     setupEventListeners(); // 設置特別的事件監聽器函數來監控指定變數的變化
-    initializeSeatSelection(); // 初始化座位選擇功能
+    // initializeSeatSelection(); // 初始化座位選擇功能
+    initTicketTypeChangeEvent();
 });
 
 // 生成訂票日期選項
@@ -81,55 +82,63 @@ function validateStationSelection() {
     }
 }
 
-function showSeats(car_id) {
-    // JavaScript 用於顯示特定車廂的座位
-    let seatsDiv = document.getElementById('seats');
-    // 根據 car_id 更新 seatsDiv 的內容
-}
+// // 綁定所有票種選擇下拉菜單的變更事件到 handleTicketTypeChange
+// function initTicketTypeChangeEvent() {
+//     const ticketTypes = document.querySelectorAll('.ticket_type');
+//     ticketTypes.forEach(ticketType => {
+//         ticketType.addEventListener('change', handleTicketTypeChange);
+//     });
+// }
 
-function cancelSelection() {
-    window.location.href = "{{ url_for('query_train') }}";
-}
+// // 處理票種變更事件, 呼叫 fetchTicketPrice 來獲取新的票價，並在成功獲取後更新對應的票價元素和總價
+// function handleTicketTypeChange(event) {
+//     const seatId = event.target.dataset.seatId;
+//     const ticketTypeValue = event.target.value;
+//     const priceElement = document.querySelector(`.ticket_price[data-seat-id="${seatId}"]`);
 
-function initializeSeatSelection() {
-    const carButtons = document.querySelectorAll('button[onclick^="showSeats"]');
-    carButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const carId = this.getAttribute('onclick').match(/\d+/)[0];
-            showSeats(carId);
-        });
-    });
+//     fetchTicketPrice(ticketTypeValue)
+//         .then(price => {
+//             updatePriceElement(priceElement, price);
+//             updateTotalPrice();
+//         })
+//         .catch(error => console.error('Error fetching ticket price:', error));
+// }
 
-    const cancelSelectionButton = document.querySelector('button[onclick="cancelSelection()"]');
-    if (cancelSelectionButton) {
-        cancelSelectionButton.addEventListener('click', cancelSelection);
-    }
-}
+// // 發送請求到後端 API /calculate_ticket_price 來獲取票價，返回一個 Promise。
+// function fetchTicketPrice(ticketType) {
+//     return fetch(`/calculate_ticket_price?ticket_type=${ticketType}`)
+//         .then(response => {
+//             if (!response.ok) {
+//                 throw new Error('Network response was not ok');
+//             }
+//             return response.json();
+//         })
+//         .then(data => data.price)
+//         .catch(error => {
+//             console.error('Error fetching ticket price:', error);
+//             return 0;  // 返回 0 確保價格更新
+//         });
+// }
 
-function showSeats(carId) {
-    // 在這裡更新座位顯示邏輯
-    let seatsDiv = document.getElementById('seats');
-    // 清空現有的座位顯示
-    seatsDiv.innerHTML = '';
-    // 假設我們從後端獲取的座位數據已經存儲在 window.seatsData 中
-    window.seatsData.forEach(seat => {
-        if (seat.car_id == carId) {
-            let seatElement = document.createElement('label');
-            seatElement.textContent = seat.seat_id;
-            let checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.name = 'selected_seats';
-            checkbox.value = `${seat.car_id}-${seat.seat_id}`;
-            if (seat.is_available == 0) {
-                checkbox.disabled = true;
-            } else {
-                checkbox.classList.add('highlight');
-            }
-            seatElement.appendChild(checkbox);
-            seatsDiv.appendChild(seatElement);
-        }
-    });
-}
+// // 更新指定元素的票價
+// function updatePriceElement(priceElement, price) {
+//     priceElement.textContent = `${price} 元`;
+// }
+
+// // 計算並更新所有票價的總價
+// function updateTotalPrice() {
+//     const totalPriceElement = document.getElementById('total_price');
+//     const prices = document.querySelectorAll('.ticket_price');
+//     let totalPrice = 0;
+
+//     prices.forEach(priceElement => {
+//         const price = parseInt(priceElement.textContent.split(' ')[0], 10);
+//         totalPrice += price;
+//     });
+
+//     totalPriceElement.textContent = totalPrice;
+// }
+
 
 function cancelSelection() {
     window.location.href = "/query_train";

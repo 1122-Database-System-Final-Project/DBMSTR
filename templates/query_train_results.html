@@ -36,10 +36,10 @@
                 <td><form action="{{ url_for('confirm_to_start') }}" method="POST">
                     <input type="hidden" name="train_id" value="{{ train[0] }}">
                     <input type="hidden" name="train_type" value="{{ train[1] }}">
-                    <input type="hidden" name="departure_time" value="{{ train[2] }}">
-                    <input type="hidden" name="arrival_time" value="{{ train[3] }}">
-                    <input type="hidden" name="departure_station" value="{{ train[4] }}">
-                    <input type="hidden" name="arrival_station" value="{{ train[5] }}">
+                    <input type="hidden" name="train_depart_time" value="{{ train[2] }}">
+                    <input type="hidden" name="train_arrive_time" value="{{ train[3] }}">
+                    <input type="hidden" name="departure" value="{{ train[4] }}">
+                    <input type="hidden" name="destination" value="{{ train[5] }}">
                     <input type="hidden" name="available_seats" value="{{ train[6] }}">
                     <button type="submit">訂票</button>
                 </form></td>

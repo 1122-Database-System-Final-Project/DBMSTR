@@ -56,6 +56,11 @@ sqlite3 database.db
 ```
 sqlite> .backup backup.sq3
 ```
+### 6. 進入 docker 的 SQLite
+
+```
+docker exec -it dbmstr-sqlite-1 sqlite3 /db/database.db
+```
 
 ## 安裝步驟 (使用虛擬環境) Installation
 

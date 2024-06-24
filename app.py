@@ -277,29 +277,15 @@ def modify_order():
                 empty_seats = seat.get_all_available_seats_by_train_id(order_details["train_id"])
                 return render_template('seat_selection_for_modify.html',order_details=order_details, train_id=order_details["train_id"], counting=counting, seats=empty_seats, error_message=error_message,id_no=id_no)                
             else:
-                #selected_seats = [int(seat) for seat in selected_seats]
                 #print(selected_seats)
+                #print(id_no,order_id)
                 return render_template('confirm_modification.html',order_details=order_details, train_id=order_details["train_id"], seats=selected_seats,order_id=order_id,id_no=id_no)            
 
         empty_seats = seat.get_all_available_seats_by_train_id(order_details["train_id"])
         return render_template('seat_selection_for_modify.html',order_details=order_details, train_id=order_details["train_id"], counting=counting, seats=empty_seats,id_no=id_no)
         
-    elif request.method == 'GET':
-        id_no = request.args.get('id_no')
-        order_id = request.args.get('order_id')
-        if not id_no or not order_id:
-            error_message = "Both ID number and Order ID are required."
-            return render_template('confirm_modification.html', message=error_message)
-        
-        # 查詢訂單
-        order_details = oq.query_order(id_no, order_id)
-        if not order_details:
-            error_message = "Order not found"
-            return render_template('confirm_modification.html', order_details=order_details,message=error_message, id_no=id_no, order_id=order_id)
-        
-        seats = seat.get_all_available_seats_by_train_id(order_details["train_id"])
-        return render_template('seat_selection_for_modify.html',order_details=order_details, train_id=order_details["train_id"], counting=order_details["total_tickets"], seats=seats)
     
+       
 
 @app.route('/confirm_modification', methods=['GET','POST'])
 def confirm_modification():
@@ -362,6 +348,7 @@ def confirm_delete_order():
             return render_template('order_deletion.html', error_message=error_message, order_id=order_id, id_no=id_no)
     
         # 刪除訂單
+        #print(order_id)
         od.delete_order(order_id)
     
         success_message = "訂單成功取消"

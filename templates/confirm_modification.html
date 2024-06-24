@@ -17,7 +17,7 @@
         <li>
             車票 {{ loop.index }}
             <ul>
-                <li>車廂: {{ seat[2:3] }}車</li>
+                <li>車廂: {{ seat[3:4] }}車</li>
                 <li>座位: {{ seat[5: ]}}號</li>
             </ul>
         </li>
@@ -29,9 +29,9 @@
         <button type="submit">確認修改</button>
     </form>
     
-    <form action="{{ url_for('modify_order') }}" method="GET">
-        <input type="hidden" name="id_no" value="{{ request.args.get('id_no') }}">
-        <input type="hidden" name="order_id" value="{{ request.args.get('order_id') }}">
+    <form action="{{ url_for('modify_order') }}" method="POST">
+        <input type="hidden" name="id_no" value="{{ id_no }}">
+        <input type="hidden" name="order_id" value="{{ order_details.order_id }}">
         <button type="submit">返回修改</button>
     </form>
 </body>

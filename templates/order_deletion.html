@@ -12,7 +12,7 @@
         <input type="submit" value="確認取消">
     </form>
     <br>
-    <form action="{{ url_for('look_at_my_order') }}">
+    <form method="POST" action="{{ url_for('look_at_my_order') }}">
         <input type="hidden" name="id_no" value="{{ id_no }}">
         <input type="hidden" name="order_id" value="{{ order_id }}">
         <input type="submit" value="不小心按錯">
